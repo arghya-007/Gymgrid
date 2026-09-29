@@ -18,6 +18,9 @@ export default async function PlatformLayout({
             <Link className="text-sm font-medium text-slate-600 hover:text-slate-950" href="/platform">
               Organizations
             </Link>
+            <Link className="text-sm font-medium text-slate-600 hover:text-slate-950" href="/gym">
+              Gym workspace
+            </Link>
           </nav>
           <div className="flex items-center gap-4">
             <span className="hidden text-sm text-slate-500 sm:inline">{user.email}</span>

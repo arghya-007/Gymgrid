@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
-export async function requirePlatformAdministrator() {
+export async function requireAuthenticatedUser() {
   const supabase = await createClient();
   const {
     data: { user },
@@ -11,6 +11,12 @@ export async function requirePlatformAdministrator() {
   if (userError || !user) {
     redirect("/login");
   }
+
+  return { supabase, user };
+}
+
+export async function requirePlatformAdministrator() {
+  const { supabase, user } = await requireAuthenticatedUser();
 
   const { data: isPlatformAdministrator, error: roleError } = await supabase.rpc(
     "is_platform_administrator",

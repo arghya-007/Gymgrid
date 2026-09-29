@@ -22,6 +22,18 @@ export async function signIn(
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
+    console.warn("Supabase sign-in failed", {
+      code: error.code,
+      name: error.name,
+      status: error.status,
+    });
+
+    if (error.status !== 400 || error.code !== "invalid_credentials") {
+      return {
+        message: "Authentication is temporarily unavailable. Please try again.",
+      };
+    }
+
     return { message: "The email or password is incorrect." };
   }
 

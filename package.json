@@ -9,6 +9,7 @@
   ],
   "scripts": {
     "dev:web": "npm run dev --workspace=gymgrid-web",
+    "dev:web:system-ca": "npm run dev:system-ca --workspace=gymgrid-web",
     "build:web": "npm run build --workspace=gymgrid-web",
     "lint": "npm run lint --workspace=gymgrid-web",
     "typecheck:domain": "npm run typecheck --workspace=@gymgrid/domain"

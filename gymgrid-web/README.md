@@ -14,6 +14,12 @@ npm run dev:web
 
 Open [http://localhost:3000](http://localhost:3000) with your browser.
 
+On a managed Windows laptop where Node reports `UNABLE_TO_GET_ISSUER_CERT_LOCALLY`, use the operating system certificate store without disabling TLS verification:
+
+```bash
+npm run dev:web:system-ca
+```
+
 ## Checks
 
 Run quality checks from the repository root:
@@ -23,4 +29,4 @@ npm run lint
 npm run build:web
 ```
 
-This application is intentionally not connected to Supabase, a deployment provider, or a custom domain in Phase 0.
+The local application connects to Supabase with the public project URL and publishable key from `.env.local`. Never place a service-role key in a browser-facing environment variable.
