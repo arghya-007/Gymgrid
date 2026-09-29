@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { signOut } from "@/app/login/actions";
 import { requireTenantMembership, tenantRoleLabels } from "@/lib/tenant";
-
-const upcomingNavigation = ["Members", "Leads", "Team", "Membership plans"];
+import { GymNavigation } from "./gym-navigation";
 
 export default async function GymOrganizationLayout({
   children,
@@ -26,27 +25,7 @@ export default async function GymOrganizationLayout({
             {tenantRoleLabels[membership.primaryRole]}
           </p>
         </div>
-        <nav className="mt-7 space-y-1" aria-label="Gym administration">
-          <Link
-            className="flex items-center justify-between rounded-xl bg-emerald-400 px-4 py-3 text-sm font-semibold text-slate-950"
-            href={`/gym/${organizationSlug}`}
-          >
-            Overview
-            <span aria-hidden="true">→</span>
-          </Link>
-          {upcomingNavigation.map((label) => (
-            <span
-              aria-disabled="true"
-              className="flex cursor-not-allowed items-center justify-between rounded-xl px-4 py-3 text-sm font-medium text-slate-500"
-              key={label}
-            >
-              {label}
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-600">
-                Next
-              </span>
-            </span>
-          ))}
-        </nav>
+        <GymNavigation organizationSlug={organizationSlug} />
         <div className="mt-auto space-y-3 border-t border-slate-800 pt-5">
           {isPlatformAdministrator ? (
             <Link
@@ -85,23 +64,7 @@ export default async function GymOrganizationLayout({
               </button>
             </form>
           </div>
-          <nav className="mt-4 flex gap-2 overflow-x-auto" aria-label="Gym administration">
-            <Link
-              className="whitespace-nowrap rounded-lg bg-slate-950 px-4 py-2 text-xs font-semibold text-white"
-              href={`/gym/${organizationSlug}`}
-            >
-              Overview
-            </Link>
-            {upcomingNavigation.map((label) => (
-              <span
-                aria-disabled="true"
-                className="whitespace-nowrap rounded-lg bg-slate-100 px-4 py-2 text-xs font-semibold text-slate-400"
-                key={label}
-              >
-                {label}
-              </span>
-            ))}
-          </nav>
+          <GymNavigation mobile organizationSlug={organizationSlug} />
         </header>
         {children}
       </div>

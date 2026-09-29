@@ -59,6 +59,7 @@ export interface TenantMembership {
   branches: TenantBranch[];
   primaryRole: TenantRole;
   canManageOrganization: boolean;
+  canManageMembers: boolean;
   canViewSubscription: boolean;
 }
 
@@ -176,6 +177,11 @@ export const getTenantSession = cache(async () => {
         canManageOrganization:
           hasOrganizationRole("gym_owner") ||
           hasOrganizationRole("gym_manager"),
+        canManageMembers: membershipRoles.some((assignment) =>
+          ["gym_owner", "gym_manager", "receptionist"].includes(
+            assignment.role,
+          ),
+        ),
         canViewSubscription:
           hasOrganizationRole("gym_owner") ||
           hasOrganizationRole("gym_manager") ||

@@ -22,6 +22,23 @@ export const organizationStatusValues = [
 
 export type OrganizationStatus = (typeof organizationStatusValues)[number];
 
+export const memberRecordStatusValues = [
+  "active",
+  "inactive",
+  "archived",
+] as const;
+
+export type MemberRecordStatus = (typeof memberRecordStatusValues)[number];
+
+export const memberGenderValues = [
+  "female",
+  "male",
+  "non_binary",
+  "prefer_not_to_say",
+] as const;
+
+export type MemberGender = (typeof memberGenderValues)[number];
+
 export interface TenantScope {
   organizationId: string;
   branchId?: string;

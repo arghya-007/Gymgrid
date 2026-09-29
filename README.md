@@ -15,7 +15,7 @@ The Expo mobile workspace will be introduced in Phase 5, after the authenticated
 
 ## Development status
 
-Phase 1 is in progress. The secure tenant schema, RLS policies, authentication entry point, and platform-admin onboarding slice are checked in locally. No cloud service, deployment target, payment provider, or production database has been connected.
+Phase 1 is complete and verified against the development Supabase project. Phase 2 is in progress: the tenant-aware gym dashboard and secured Member CRM list, search, and create-member flow are implemented. Deployment, payment providers, messaging, and production infrastructure remain disconnected.
 
 ## Local commands
 
@@ -23,6 +23,7 @@ Run these commands from this repository root after dependencies are installed:
 
 ```bash
 npm run dev:web
+npm run dev:web:system-ca
 npm run lint
 npm run build:web
 npm run typecheck:domain
