@@ -1,0 +1,20 @@
+{
+  "name": "gymgrid",
+  "version": "0.1.0",
+  "private": true,
+  "description": "GymGrid multi-tenant gym management SaaS",
+  "workspaces": [
+    "gymgrid-web",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:web": "npm run dev --workspace=gymgrid-web",
+    "build:web": "npm run build --workspace=gymgrid-web",
+    "lint": "npm run lint --workspace=gymgrid-web",
+    "typecheck:domain": "npm run typecheck --workspace=@gymgrid/domain"
+  },
+  "engines": {
+    "node": ">=22.0.0",
+    "npm": ">=10.0.0"
+  }
+}

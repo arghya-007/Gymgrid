@@ -1,0 +1,3 @@
+-- Keep this file safe for local development. Product plans are migration data.
+-- Demo gyms and users will be added in a later phase and must never contain
+-- production data or credentials.

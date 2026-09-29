@@ -1,0 +1,27 @@
+# Dependencies and build output
+node_modules/
+**/node_modules/
+.next/
+**/.next/
+.next-*/
+**/.next-*/
+coverage/
+*.tsbuildinfo
+
+# Local environment and credentials
+.env
+.env.*
+!.env.example
+
+# Editor and operating-system files
+.DS_Store
+*.pem
+
+# Deployment tooling
+.vercel/
+.expo/
+
+# Mobile build output
+android/
+ios/
+dist/

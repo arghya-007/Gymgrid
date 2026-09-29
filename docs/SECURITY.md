@@ -1,0 +1,45 @@
+# Security model
+
+## Trust boundaries
+
+- Supabase Auth establishes identity; authorization is always rechecked against Postgres.
+- Row Level Security is the tenant boundary. UI visibility and Next.js route guards are usability layers, not the final control.
+- Platform administrators are stored separately from organization roles.
+- Browser and mobile clients use only Supabase public credentials. Service-role credentials must never be exposed to either client.
+- Tenant onboarding is an atomic database function that verifies the caller is an active platform administrator.
+- Audit records cannot be updated or deleted through normal database operations.
+
+## Authorization summary
+
+| Resource | Platform admin | Gym owner | Gym manager | Other tenant roles |
+| --- | --- | --- | --- | --- |
+| Organizations | Manage all | Read own | Read own | Read own |
+| Branches | Manage all | Create/update own | Create/update own when organization-wide | Read assigned scope |
+| Tenant users and roles | Manage all | Read own organization | Read own organization when organization-wide | Read self |
+| SaaS subscriptions | Manage all | Read own | Read own when organization-wide | Accountant can read own |
+| Audit log | Read all | Read own organization | No access | No access |
+| Plan catalogue | Manage | Read | Read | Read |
+
+Direct tenant-side membership and role writes are intentionally blocked in Phase 1. Phase 2 will add narrowly scoped database functions for owner-managed staff invitations without permitting privilege escalation.
+
+## First platform administrator
+
+The first platform administrator is a deliberate bootstrap action. After creating the user in the development Supabase Auth project, run the following once from an administrator SQL session, replacing the placeholder with that Auth user ID:
+
+```sql
+insert into public.platform_administrators (user_id, granted_by)
+values ('AUTH_USER_UUID', 'AUTH_USER_UUID');
+```
+
+After bootstrap, platform administrators may manage other platform administrators through audited application workflows added later. Never place a real user ID in a migration or seed file.
+
+## Verification gate
+
+`supabase/tests/phase1_rls.sql` creates two isolated tenants inside a transaction and verifies that:
+
+1. A tenant owner sees only their organization and branch.
+2. A tenant owner cannot update another tenant.
+3. A tenant owner cannot directly add users or grant roles.
+4. A platform administrator sees all tenants and can call the atomic onboarding function.
+
+The test rolls back all fixtures and must run against a disposable local database, never production.
