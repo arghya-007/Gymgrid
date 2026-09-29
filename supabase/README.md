@@ -14,3 +14,16 @@ The Phase 1 migration is applied to the development Supabase project. Local publ
 - `seed.sql` remains production-data-free.
 
 When the Supabase CLI and Docker are available, initialize a local stack and repeat the database test there. The first platform administrator must be bootstrapped manually as described in `docs/SECURITY.md`; no personal user ID belongs in a migration.
+
+## First CLI connection
+
+The initial migration was applied through the SQL editor because the company laptop does not have the Supabase CLI or Docker. The schema is verified, but the CLI migration-history table has not been initialized. On the first CLI-capable computer, repair the history **before** running `db push`:
+
+```bash
+supabase login
+supabase link --project-ref eeonwzudmbsyhvfcvcba
+supabase migration repair --status applied 202609300001
+supabase migration list
+```
+
+The final command must show `202609300001` in both the local and remote columns. Future schema changes should then be deployed with migration files and `supabase db push`, not pasted into the dashboard.
