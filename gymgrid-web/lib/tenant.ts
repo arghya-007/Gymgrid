@@ -66,6 +66,8 @@ export interface TenantMembership {
   canManageLeads: boolean;
   canManagePayments: boolean;
   canVoidPayments: boolean;
+  canManageCheckIns: boolean;
+  canViewOperationalReports: boolean;
   canViewSubscription: boolean;
 }
 
@@ -180,6 +182,9 @@ export const getTenantSession = cache(async () => {
       membershipRoles.some(
         (assignment) => assignment.role === role && assignment.branchId === null,
       );
+    const hasOrganizationWideAccess = membershipRoles.some(
+      (assignment) => assignment.branchId === null,
+    );
 
     return [
       {
@@ -187,7 +192,14 @@ export const getTenantSession = cache(async () => {
         organization,
         roles: membershipRoles,
         branches: branches
-          .filter((branch) => branch.organization_id === organization.id)
+          .filter(
+            (branch) =>
+              branch.organization_id === organization.id &&
+              (hasOrganizationWideAccess ||
+                membershipRoles.some(
+                  (assignment) => assignment.branchId === branch.id,
+                )),
+          )
           .map(({ id, code, name, status }) => ({ id, code, name, status })),
         primaryRole,
         canManageOrganization:
@@ -223,6 +235,14 @@ export const getTenantSession = cache(async () => {
           ["gym_owner", "gym_manager", "accountant"].includes(
             assignment.role,
           ),
+        ),
+        canManageCheckIns: membershipRoles.some((assignment) =>
+          ["gym_owner", "gym_manager", "receptionist"].includes(
+            assignment.role,
+          ),
+        ),
+        canViewOperationalReports: membershipRoles.some((assignment) =>
+          ["gym_owner", "gym_manager"].includes(assignment.role),
         ),
         canViewSubscription:
           hasOrganizationRole("gym_owner") ||

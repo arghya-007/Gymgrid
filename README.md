@@ -15,7 +15,7 @@ The Expo mobile workspace will be introduced in Phase 5, after the authenticated
 
 ## Development status
 
-Phases 1 and 2 are complete and verified against the development Supabase project. Phase 3 is in progress: secure enrolment and lifecycle management, partial manual collections with printable receipts, and atomic CSV member imports are integrated into the gym portal. Check-ins and operational reports are the remaining Phase 3 slice. Online payment providers, messaging, deployment, and production infrastructure remain disconnected.
+Phases 1 through 3 are complete and verified against the development Supabase project. The gym portal now covers member CRM, plans, staff, leads, secure enrolment and lifecycle management, partial manual collections with printable receipts, atomic CSV imports, staff-recorded check-ins, and daily operational reports. Scheduling is the next product phase. Online payment providers, messaging, deployment, and production infrastructure remain disconnected.
 
 ## Local commands
 

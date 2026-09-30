@@ -182,15 +182,15 @@ export default async function GymDashboardPage({
               Phase 3
             </p>
             <h2 className="mt-3 text-2xl font-semibold tracking-tight">
-              Operations are underway
+              Operations are ready
             </h2>
             <p className="mt-3 text-sm leading-6 text-slate-400">
-              Members can now be enrolled in active plans with secure branch scope, preserved plan terms, calculated membership dates, and live membership status.
+              Enrolments, lifecycle actions, receipts, imports, attendance, and daily operational metrics now share one secure tenant-aware workspace.
             </p>
             <div className="mt-6 rounded-2xl border border-slate-800 bg-slate-900 p-4">
-              <p className="text-sm font-semibold">Next slice</p>
+              <p className="text-sm font-semibold">Next phase</p>
               <p className="mt-1 text-sm text-slate-400">
-                Import existing members safely with validation and duplicate review.
+                Class schedules, capacity, waitlists, and bookings.
               </p>
             </div>
           </section>

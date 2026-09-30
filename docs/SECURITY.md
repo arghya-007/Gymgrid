@@ -23,6 +23,7 @@
 | Member memberships | Read all | Manage lifecycle in own organization | Manage lifecycle in assigned scope | Receptionist manages assigned scope; trainer/accountant read assigned scope |
 | Manual payments | Read all | Record and void in own organization | Record and void in assigned scope | Receptionist records assigned-scope payments; accountant records and voids; others have no access |
 | Member imports | Read all | Import into own organization | Import into assigned scope | Receptionist imports into assigned scope; others have no access |
+| Member check-ins | Read all | Record in own organization | Record in assigned scope | Receptionist records in assigned scope; others have no access |
 
 Direct tenant-side membership, role, invitation, membership-plan, and lead writes remain blocked. Phase 2 exposes narrowly scoped security-definer functions: owners may invite managers and lower staff roles, organization-wide managers may invite only lower roles, and neither can grant gym-owner access. Invitations activate only after an authenticated user signs in with the exact invited email. Suspension and invitation revocation follow the same role hierarchy. Lead creation and updates require an owner, manager, or receptionist role in the selected branch; conversion creates the member and marks the lead won in one database transaction.
 
@@ -55,3 +56,5 @@ Phase 3 membership writes also remain function-only. `enroll_member` rechecks or
 Manual payment writes are function-only. `record_manual_payment` locks the membership balance before accepting a partial payment, prevents overpayment, derives currency and member scope from the membership, and allocates an organization-specific receipt number. Receipts cannot be edited or deleted; authorized finance roles use `void_manual_payment`, which preserves the original amount and actor-attributed correction reason.
 
 Member imports are function-only. The web application validates the CSV for a useful preview, but `import_members` repeats text, phone, email, date, gender, role, organization, and branch validation in Postgres. It serializes concurrent imports per organization, rejects duplicate contacts, and creates the batch and every member in one transaction. Authenticated clients can read authorized batch metadata but cannot insert batch rows directly.
+
+Check-in writes are function-only. `record_member_check_in` repeats staff role, organization, branch, active-member, active-membership, and local-date checks in Postgres. An advisory lock serializes scans for one member and rejects repeated same-branch entries inside two minutes. `get_operational_report` accepts at most 93 days and permits only owners or managers in the requested scope; collection totals exclude voided receipts.

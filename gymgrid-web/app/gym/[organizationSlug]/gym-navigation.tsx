@@ -7,9 +7,13 @@ const upcomingNavigation: string[] = [];
 
 export function GymNavigation({
   organizationSlug,
+  canManageCheckIns,
+  canViewOperationalReports,
   mobile = false,
 }: {
   organizationSlug: string;
+  canManageCheckIns: boolean;
+  canViewOperationalReports: boolean;
   mobile?: boolean;
 }) {
   const pathname = usePathname();
@@ -19,6 +23,8 @@ export function GymNavigation({
   const teamHref = `${overviewHref}/team`;
   const leadsHref = `${overviewHref}/leads`;
   const paymentsHref = `${overviewHref}/payments`;
+  const checkInsHref = `${overviewHref}/check-ins`;
+  const reportsHref = `${overviewHref}/reports`;
   const items = [
     { label: "Overview", href: overviewHref, active: pathname === overviewHref },
     {
@@ -47,6 +53,20 @@ export function GymNavigation({
       active:
         pathname === paymentsHref || pathname.startsWith(`${paymentsHref}/`),
     },
+    ...(canManageCheckIns
+      ? [{
+          label: "Check-ins",
+          href: checkInsHref,
+          active: pathname === checkInsHref || pathname.startsWith(`${checkInsHref}/`),
+        }]
+      : []),
+    ...(canViewOperationalReports
+      ? [{
+          label: "Reports",
+          href: reportsHref,
+          active: pathname === reportsHref || pathname.startsWith(`${reportsHref}/`),
+        }]
+      : []),
   ];
 
   if (mobile) {

@@ -25,7 +25,11 @@ export default async function GymOrganizationLayout({
             {tenantRoleLabels[membership.primaryRole]}
           </p>
         </div>
-        <GymNavigation organizationSlug={organizationSlug} />
+        <GymNavigation
+          canManageCheckIns={membership.canManageCheckIns}
+          canViewOperationalReports={membership.canViewOperationalReports}
+          organizationSlug={organizationSlug}
+        />
         <div className="mt-auto space-y-3 border-t border-slate-800 pt-5">
           {isPlatformAdministrator ? (
             <Link
@@ -64,7 +68,12 @@ export default async function GymOrganizationLayout({
               </button>
             </form>
           </div>
-          <GymNavigation mobile organizationSlug={organizationSlug} />
+          <GymNavigation
+            canManageCheckIns={membership.canManageCheckIns}
+            canViewOperationalReports={membership.canViewOperationalReports}
+            mobile
+            organizationSlug={organizationSlug}
+          />
         </header>
         {children}
       </div>

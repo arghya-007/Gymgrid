@@ -33,9 +33,11 @@ The Phase 2 database and application gate is green: owners, managers, and recept
 - [x] Build renewals, freezes, cancellations, and membership lifecycle actions.
 - [x] Build manual payment records and receipts.
 - [x] Build member imports.
-- [ ] Build check-ins and operational reports.
+- [x] Build check-ins and operational reports.
 
 The completed Phase 3 slices preserve plan and price terms on every enrolment, prevent overlapping membership dates, enforce the subscription’s active-member allowance, add audited lifecycle workflows, and provide partial-payment collection with immutable printable receipts and audited voids. Payment collection is limited to authorized owners, managers, receptionists, and accountants; only owners, managers, and accountants may void a receipt. CSV imports validate and normalize up to 500 members before committing the entire batch atomically, with duplicate detection and branch-scoped authorization repeated inside Postgres.
+
+The Phase 3 gate is green: check-ins require an active same-branch membership, repeated scans inside two minutes are rejected, owners and managers can run branch-scoped or organization-wide daily reports, direct writes remain blocked, and the live rollback test left no fixture data behind.
 
 ## Phase 4 — Scheduling
 

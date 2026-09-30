@@ -1,6 +1,6 @@
 # Database source of truth
 
-The Phase 1 core, all Phase 2 migrations, and the Phase 3 enrolment, lifecycle, manual-payment, and member-import migrations are applied to the development Supabase project. Local public client values live only in the ignored `gymgrid-web/.env.local` file.
+The Phase 1 core, all Phase 2 migrations, and all Phase 3 operations migrations are applied to the development Supabase project. Local public client values live only in the ignored `gymgrid-web/.env.local` file.
 
 - Place reviewed, forward-only SQL migrations in `migrations/`.
 - Keep safe demo-only data in `seed.sql`.
@@ -53,11 +53,16 @@ The Phase 1 core, all Phase 2 migrations, and the Phase 3 enrolment, lifecycle, 
 - `migrations/202609300009_member_imports.sql` contains audited import-batch metadata, source linkage on member records, a 500-row transaction limit, India-aware phone normalization, duplicate detection, branch authorization, and a secured atomic import function.
 - `tests/phase3_member_imports_rls.sql` verifies owner and receptionist imports, imported-member linkage, duplicate rejection, direct-write blocking, member-role and cross-tenant denial, and rollback cleanup.
 
+## Phase 3 check-in and reporting contents
+
+- `migrations/202609300010_check_ins_and_reports.sql` contains immutable branch attendance, active-membership validation, two-minute duplicate protection, staff-role authorization, and a secured 93-day operational report function.
+- `tests/phase3_check_ins_and_reports_rls.sql` verifies owner and receptionist check-ins, active-membership and duplicate enforcement, direct-write blocking, restricted reporting, member-role and cross-tenant denial, report totals, and rollback cleanup.
+
 When the Supabase CLI and Docker are available, initialize a local stack and repeat the database test there. The first platform administrator must be bootstrapped manually as described in `docs/SECURITY.md`; no personal user ID belongs in a migration.
 
 ## First CLI connection
 
-The first nine migrations were applied through the SQL editor because the company laptop does not have the Supabase CLI or Docker. The schema is verified, but the CLI migration-history table has not been initialized. On the first CLI-capable computer, repair the history **before** running `db push`:
+The first ten migrations were applied through the SQL editor because the company laptop does not have the Supabase CLI or Docker. The schema is verified, but the CLI migration-history table has not been initialized. On the first CLI-capable computer, repair the history **before** running `db push`:
 
 ```bash
 supabase login
@@ -71,7 +76,8 @@ supabase migration repair --status applied 202609300006
 supabase migration repair --status applied 202609300007
 supabase migration repair --status applied 202609300008
 supabase migration repair --status applied 202609300009
+supabase migration repair --status applied 202609300010
 supabase migration list
 ```
 
-The final command must show all nine versions in the local and remote columns. Future schema changes should then be deployed with migration files and `supabase db push`, not pasted into the dashboard.
+The final command must show all ten versions in the local and remote columns. Future schema changes should then be deployed with migration files and `supabase db push`, not pasted into the dashboard.
