@@ -185,12 +185,12 @@ export default async function GymDashboardPage({
               Admin foundation is ready
             </h2>
             <p className="mt-3 text-sm leading-6 text-slate-400">
-              This dashboard is backed by live tenant, role, branch, and subscription data. Member CRM is now available; leads, staff controls, and membership plans remain separate secured slices.
+              This dashboard is backed by live tenant, role, branch, and subscription data. Member CRM and gym-specific membership plans are now available; leads and staff controls remain separate secured slices.
             </p>
             <div className="mt-6 rounded-2xl border border-slate-800 bg-slate-900 p-4">
               <p className="text-sm font-semibold">Next slice</p>
               <p className="mt-1 text-sm text-slate-400">
-                Membership-plan management for gym-specific offerings and pricing.
+                Staff management with secure invitations and branch-scoped roles.
               </p>
             </div>
           </section>

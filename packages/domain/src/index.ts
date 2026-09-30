@@ -39,6 +39,16 @@ export const memberGenderValues = [
 
 export type MemberGender = (typeof memberGenderValues)[number];
 
+export const membershipPlanDurationUnitValues = [
+  "day",
+  "week",
+  "month",
+  "year",
+] as const;
+
+export type MembershipPlanDurationUnit =
+  (typeof membershipPlanDurationUnitValues)[number];
+
 export interface TenantScope {
   organizationId: string;
   branchId?: string;

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const upcomingNavigation = ["Leads", "Team", "Membership plans"];
+const upcomingNavigation = ["Leads", "Team"];
 
 export function GymNavigation({
   organizationSlug,
@@ -15,12 +15,18 @@ export function GymNavigation({
   const pathname = usePathname();
   const overviewHref = `/gym/${organizationSlug}`;
   const membersHref = `${overviewHref}/members`;
+  const plansHref = `${overviewHref}/plans`;
   const items = [
     { label: "Overview", href: overviewHref, active: pathname === overviewHref },
     {
       label: "Members",
       href: membersHref,
       active: pathname === membersHref || pathname.startsWith(`${membersHref}/`),
+    },
+    {
+      label: "Membership plans",
+      href: plansHref,
+      active: pathname === plansHref || pathname.startsWith(`${plansHref}/`),
     },
   ];
 

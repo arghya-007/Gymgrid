@@ -21,7 +21,7 @@ The Phase 1 database gate is green: all 16 expected tables have RLS enabled, the
 
 - [x] Build the tenant-aware admin shell and dashboard.
 - [x] Build the Member CRM list, search, and secure create-member flow.
-- [ ] Build membership-plan management.
+- [x] Build membership-plan management.
 - [ ] Build staff management and secure invitation workflows.
 - [ ] Build lead capture and conversion workflows.
 
