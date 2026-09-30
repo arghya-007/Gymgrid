@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { connection } from "next/server";
 import { requireTenantMembership } from "@/lib/tenant";
+import {
+  membershipStatusClassName,
+  type MembershipSummary,
+} from "./membership-types";
 
 interface MemberRow {
   id: string;
@@ -50,6 +54,27 @@ export default async function MembersPage({
 
   const { data, error } = await membersQuery;
   const members = (data ?? []) as MemberRow[];
+  const memberIds = members.map((member) => member.id);
+  const membershipsResult = memberIds.length > 0
+    ? await supabase
+        .from("member_membership_statuses")
+        .select(
+          "id, member_id, enrollment_code, plan_name, status, start_date, end_date",
+        )
+        .eq("organization_id", membership.organization.id)
+        .in("member_id", memberIds)
+        .order("start_date", { ascending: false })
+    : { data: [], error: null };
+  const memberships = (membershipsResult.data ?? []) as MembershipSummary[];
+  const latestMembershipByMember = new Map<string, MembershipSummary>();
+  for (const memberMembership of memberships) {
+    if (!latestMembershipByMember.has(memberMembership.member_id)) {
+      latestMembershipByMember.set(
+        memberMembership.member_id,
+        memberMembership,
+      );
+    }
+  }
   const branchesById = new Map(
     membership.branches.map((branch) => [branch.id, branch.name]),
   );
@@ -107,9 +132,9 @@ export default async function MembersPage({
           </button>
         </form>
 
-        {error ? (
+        {error || membershipsResult.error ? (
           <p className="mt-7 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800">
-            Members could not be loaded. Confirm that the Member CRM migration has been applied.
+            Member records or membership status could not be loaded. Confirm that the latest database migrations have been applied.
           </p>
         ) : null}
 
@@ -129,7 +154,7 @@ export default async function MembersPage({
             <div className="divide-y divide-slate-100">
               {members.map((member) => (
                 <article
-                  className="grid gap-4 p-5 sm:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_auto] sm:items-center"
+                  className="grid gap-4 p-5 md:grid-cols-[minmax(0,1.3fr)_minmax(0,0.8fr)_minmax(0,1fr)_auto] md:items-center"
                   key={member.id}
                 >
                   <div className="min-w-0">
@@ -154,9 +179,28 @@ export default async function MembersPage({
                       Added {formatDate(member.created_at)}
                     </p>
                   </div>
-                  <span className="w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold capitalize text-emerald-700">
-                    {member.status}
-                  </span>
+                  {latestMembershipByMember.get(member.id) ? (
+                    <div>
+                      <p className="text-sm font-medium text-slate-700">
+                        {latestMembershipByMember.get(member.id)?.plan_name}
+                      </p>
+                      <span
+                        className={`mt-2 inline-flex rounded-full px-3 py-1 text-xs font-semibold capitalize ${membershipStatusClassName(latestMembershipByMember.get(member.id)!.status)}`}
+                      >
+                        {latestMembershipByMember.get(member.id)?.status}
+                      </span>
+                    </div>
+                  ) : (
+                    <span className="w-fit rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-800">
+                      Not enrolled
+                    </span>
+                  )}
+                  <Link
+                    className="text-sm font-semibold text-emerald-700 hover:text-emerald-900"
+                    href={`/gym/${organizationSlug}/members/${member.id}`}
+                  >
+                    View
+                  </Link>
                 </article>
               ))}
             </div>

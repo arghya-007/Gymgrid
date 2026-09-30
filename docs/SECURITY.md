@@ -20,6 +20,7 @@
 | Audit log | Read all | Read own organization | No access | No access |
 | Plan catalogue | Manage | Read | Read | Read |
 | Leads | Read all | Manage own organization | Manage assigned scope | Receptionist manages assigned scope; others have no access |
+| Member memberships | Read all | Enrol in own organization | Enrol in assigned scope | Receptionist enrols assigned scope; trainer/accountant read assigned scope |
 
 Direct tenant-side membership, role, invitation, membership-plan, and lead writes remain blocked. Phase 2 exposes narrowly scoped security-definer functions: owners may invite managers and lower staff roles, organization-wide managers may invite only lower roles, and neither can grant gym-owner access. Invitations activate only after an authenticated user signs in with the exact invited email. Suspension and invitation revocation follow the same role hierarchy. Lead creation and updates require an owner, manager, or receptionist role in the selected branch; conversion creates the member and marks the lead won in one database transaction.
 
@@ -46,3 +47,5 @@ After bootstrap, platform administrators may manage other platform administrator
 The test rolls back all fixtures and must run against a disposable local database, never production.
 
 Each Phase 2 migration has a matching transaction-based test under `supabase/tests/`. The lead-management test covers authorized creation and updates, direct-write and cross-tenant blocking, denial for member roles, and atomic lead-to-member conversion. Every fixture is rolled back.
+
+Phase 3 membership writes also remain function-only. `enroll_member` rechecks organization, branch, member, plan, role, overlapping dates, and active-member allowance inside one transaction. The browser never supplies plan prices or calculated end dates; Postgres derives and snapshots them from the authorized plan record.

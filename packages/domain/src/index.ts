@@ -67,6 +67,26 @@ export const membershipPlanDurationUnitValues = [
 export type MembershipPlanDurationUnit =
   (typeof membershipPlanDurationUnitValues)[number];
 
+export const membershipLifecycleStateValues = [
+  "open",
+  "frozen",
+  "cancelled",
+] as const;
+
+export type MembershipLifecycleState =
+  (typeof membershipLifecycleStateValues)[number];
+
+export const membershipDisplayStatusValues = [
+  "scheduled",
+  "active",
+  "frozen",
+  "expired",
+  "cancelled",
+] as const;
+
+export type MembershipDisplayStatus =
+  (typeof membershipDisplayStatusValues)[number];
+
 export const leadStatusValues = [
   "new",
   "contacted",

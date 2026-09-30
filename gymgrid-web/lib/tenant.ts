@@ -60,6 +60,7 @@ export interface TenantMembership {
   primaryRole: TenantRole;
   canManageOrganization: boolean;
   canManageMembers: boolean;
+  canManageMemberships: boolean;
   canManageMembershipPlans: boolean;
   canManageTeam: boolean;
   canManageLeads: boolean;
@@ -191,6 +192,11 @@ export const getTenantSession = cache(async () => {
           hasOrganizationRole("gym_owner") ||
           hasOrganizationRole("gym_manager"),
         canManageMembers: membershipRoles.some((assignment) =>
+          ["gym_owner", "gym_manager", "receptionist"].includes(
+            assignment.role,
+          ),
+        ),
+        canManageMemberships: membershipRoles.some((assignment) =>
           ["gym_owner", "gym_manager", "receptionist"].includes(
             assignment.role,
           ),

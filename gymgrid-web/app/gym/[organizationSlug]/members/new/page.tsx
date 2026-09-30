@@ -34,7 +34,7 @@ export default async function NewMemberPage({
             Add a member
           </h1>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600">
-            Create the contact record now. Membership plans, enrolment dates, and payments will be attached in the Operations phase.
+            Create the contact record first, then open the member profile to enrol them in a membership plan.
           </p>
           {activeBranches.length === 0 ? (
             <p className="mt-8 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">

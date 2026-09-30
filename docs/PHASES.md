@@ -29,7 +29,13 @@ The Phase 2 database and application gate is green: owners, managers, and recept
 
 ## Phase 3 — Operations
 
-- Build enrolment, renewals, freezes, membership status, manual payment records, receipts, imports, check-ins, and reports.
+- [x] Build secure plan enrolment and date-derived membership status.
+- [ ] Build renewals, freezes, cancellations, and membership lifecycle actions.
+- [ ] Build manual payment records and receipts.
+- [ ] Build member imports.
+- [ ] Build check-ins and operational reports.
+
+The first Phase 3 slice preserves plan and price terms on every enrolment, prevents overlapping membership dates, enforces the subscription’s active-member allowance, and limits creation to owners, managers, and receptionists in their authorized branch scope.
 
 ## Phase 4 — Scheduling
 

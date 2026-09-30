@@ -179,18 +179,18 @@ export default async function GymDashboardPage({
 
           <section className="rounded-3xl bg-slate-950 p-6 text-white shadow-sm">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400">
-              Phase 2
+              Phase 3
             </p>
             <h2 className="mt-3 text-2xl font-semibold tracking-tight">
-              Gym administration is ready
+              Operations are underway
             </h2>
             <p className="mt-3 text-sm leading-6 text-slate-400">
-              Phase 2 is complete. Member CRM, membership plans, secure staff access, and the lead-to-member pipeline are backed by live tenant, role, branch, and subscription data.
+              Members can now be enrolled in active plans with secure branch scope, preserved plan terms, calculated membership dates, and live membership status.
             </p>
             <div className="mt-6 rounded-2xl border border-slate-800 bg-slate-900 p-4">
-              <p className="text-sm font-semibold">Next phase</p>
+              <p className="text-sm font-semibold">Next slice</p>
               <p className="mt-1 text-sm text-slate-400">
-                Enrolments, renewals, membership lifecycle, payments, receipts, check-ins, and operational reports.
+                Renewals, freezes, cancellations, and the rest of the membership lifecycle.
               </p>
             </div>
           </section>
