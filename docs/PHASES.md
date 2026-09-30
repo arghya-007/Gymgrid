@@ -41,7 +41,11 @@ The Phase 3 gate is green: check-ins require an active same-branch membership, r
 
 ## Phase 4 — Scheduling
 
-- Build classes, trainer schedules, capacity rules, waitlists, bookings, kiosk flow, and QR check-in.
+- [x] Build class types, trainer schedules, capacity snapshots, overlap protection, and audited cancellation.
+- [ ] Build member bookings and automatic waitlist promotion.
+- [ ] Build the kiosk flow and QR class check-in.
+
+The first Phase 4 slice is live. Owners and managers can define branch-scoped class types; owners, managers, and receptionists can schedule and cancel sessions in the gym timezone. Postgres validates the trainer's active branch scope, serializes trainer scheduling, rejects overlapping sessions, snapshots capacity, and keeps all direct tenant writes blocked.
 
 ## Phase 5 — Android application
 

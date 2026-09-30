@@ -179,18 +179,18 @@ export default async function GymDashboardPage({
 
           <section className="rounded-3xl bg-slate-950 p-6 text-white shadow-sm">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400">
-              Phase 3
+              Phase 4
             </p>
             <h2 className="mt-3 text-2xl font-semibold tracking-tight">
-              Operations are ready
+              Scheduling is underway
             </h2>
             <p className="mt-3 text-sm leading-6 text-slate-400">
-              Enrolments, lifecycle actions, receipts, imports, attendance, and daily operational metrics now share one secure tenant-aware workspace.
+              Branch class types, trainer-aware sessions, capacity snapshots, and audited cancellation now share the secure tenant workspace.
             </p>
             <div className="mt-6 rounded-2xl border border-slate-800 bg-slate-900 p-4">
-              <p className="text-sm font-semibold">Next phase</p>
+              <p className="text-sm font-semibold">Next slice</p>
               <p className="mt-1 text-sm text-slate-400">
-                Class schedules, capacity, waitlists, and bookings.
+                Member bookings, waitlists, and automatic promotion.
               </p>
             </div>
           </section>

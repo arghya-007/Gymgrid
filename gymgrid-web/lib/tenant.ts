@@ -68,6 +68,8 @@ export interface TenantMembership {
   canVoidPayments: boolean;
   canManageCheckIns: boolean;
   canViewOperationalReports: boolean;
+  canManageClassPrograms: boolean;
+  canManageClassSessions: boolean;
   canViewSubscription: boolean;
 }
 
@@ -243,6 +245,14 @@ export const getTenantSession = cache(async () => {
         ),
         canViewOperationalReports: membershipRoles.some((assignment) =>
           ["gym_owner", "gym_manager"].includes(assignment.role),
+        ),
+        canManageClassPrograms: membershipRoles.some((assignment) =>
+          ["gym_owner", "gym_manager"].includes(assignment.role),
+        ),
+        canManageClassSessions: membershipRoles.some((assignment) =>
+          ["gym_owner", "gym_manager", "receptionist"].includes(
+            assignment.role,
+          ),
         ),
         canViewSubscription:
           hasOrganizationRole("gym_owner") ||

@@ -25,6 +25,7 @@ export function GymNavigation({
   const paymentsHref = `${overviewHref}/payments`;
   const checkInsHref = `${overviewHref}/check-ins`;
   const reportsHref = `${overviewHref}/reports`;
+  const classesHref = `${overviewHref}/classes`;
   const items = [
     { label: "Overview", href: overviewHref, active: pathname === overviewHref },
     {
@@ -67,6 +68,11 @@ export function GymNavigation({
           active: pathname === reportsHref || pathname.startsWith(`${reportsHref}/`),
         }]
       : []),
+    {
+      label: "Classes",
+      href: classesHref,
+      active: pathname === classesHref || pathname.startsWith(`${classesHref}/`),
+    },
   ];
 
   if (mobile) {
