@@ -15,7 +15,7 @@ The Expo mobile workspace will be introduced in Phase 5, after the authenticated
 
 ## Development status
 
-Phases 1 through 3 are complete and verified against the development Supabase project. Phase 4 is in progress: the gym portal now includes secure branch class types, timezone-aware class sessions, trainer assignment with overlap protection, capacity-safe member rosters, ordered waitlists with automatic promotion, and audited cancellation. Class kiosk/QR check-in, online payment providers, messaging, deployment, and production infrastructure remain disconnected.
+Phases 1 through 4 are complete and verified against the development Supabase project. The gym portal now includes secure branch class types, timezone-aware class sessions, trainer assignment with overlap protection, capacity-safe member rosters, ordered waitlists with automatic promotion, rotatable member QR passes, and an authenticated class check-in kiosk. The Android application is the next product phase. Online payment providers, messaging, deployment, and production infrastructure remain disconnected.
 
 ## Local commands
 

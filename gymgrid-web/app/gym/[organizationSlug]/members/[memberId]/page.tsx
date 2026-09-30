@@ -161,14 +161,24 @@ export default async function MemberDetailPage({
                 {member.phone}{member.email ? ` · ${member.email}` : ""}
               </p>
             </div>
-            {membership.canManageMemberships && member.status === "active" ? (
-              <Link
-                className="inline-flex w-fit rounded-xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700"
-                href={`/gym/${organizationSlug}/members/${member.id}/enroll`}
-              >
-                Enrol in a plan
-              </Link>
-            ) : null}
+            <div className="flex flex-wrap gap-3">
+              {membership.canManageCheckIns && member.status === "active" ? (
+                <Link
+                  className="inline-flex w-fit rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-400"
+                  href={`/gym/${organizationSlug}/members/${member.id}/qr-pass`}
+                >
+                  QR pass
+                </Link>
+              ) : null}
+              {membership.canManageMemberships && member.status === "active" ? (
+                <Link
+                  className="inline-flex w-fit rounded-xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700"
+                  href={`/gym/${organizationSlug}/members/${member.id}/enroll`}
+                >
+                  Enrol in a plan
+                </Link>
+              ) : null}
+            </div>
           </div>
           <dl className="mt-7 grid gap-4 rounded-2xl bg-slate-50 p-5 sm:grid-cols-3">
             <div>

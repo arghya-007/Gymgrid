@@ -68,11 +68,16 @@ The Phase 1 core, all Phase 2 migrations, all Phase 3 operations migrations, and
 - `migrations/202610010012_class_bookings_and_waitlist.sql` contains membership-date eligibility, serialized capacity, confirmed bookings, ordered waitlists, automatic promotion, self-service ownership checks, class-cancellation cleanup, audit coverage, and RLS.
 - `tests/phase4_class_bookings_rls.sql` verifies confirmed and waitlisted bookings, queue promotion, class-wide cancellation, linked-member self-service, direct-write and cross-tenant blocking, and rollback cleanup.
 
+## Phase 4 QR check-in contents
+
+- `migrations/202610010013_class_qr_check_ins.sql` contains rotatable member QR passes, authenticated class-kiosk check-ins, confirmed-booking and time-window validation, idempotent scans, checked-in booking protection, audit coverage, and RLS.
+- `tests/phase4_class_qr_check_ins_rls.sql` verifies trainer scans, duplicate scans, waitlist rejection, linked-member pass rotation, checked-in cancellation protection, direct-write and cross-tenant blocking, and rollback cleanup.
+
 When the Supabase CLI and Docker are available, initialize a local stack and repeat the database test there. The first platform administrator must be bootstrapped manually as described in `docs/SECURITY.md`; no personal user ID belongs in a migration.
 
 ## First CLI connection
 
-The first twelve migrations were applied through the SQL editor because the company laptop does not have the Supabase CLI or Docker. The schema is verified, but the CLI migration-history table has not been initialized. On the first CLI-capable computer, repair the history **before** running `db push`:
+The first thirteen migrations were applied through the SQL editor because the company laptop does not have the Supabase CLI or Docker. The schema is verified, but the CLI migration-history table has not been initialized. On the first CLI-capable computer, repair the history **before** running `db push`:
 
 ```bash
 supabase login
@@ -89,7 +94,8 @@ supabase migration repair --status applied 202609300009
 supabase migration repair --status applied 202609300010
 supabase migration repair --status applied 202609300011
 supabase migration repair --status applied 202610010012
+supabase migration repair --status applied 202610010013
 supabase migration list
 ```
 
-The final command must show all twelve versions in the local and remote columns. Future schema changes should then be deployed with migration files and `supabase db push`, not pasted into the dashboard.
+The final command must show all thirteen versions in the local and remote columns. Future schema changes should then be deployed with migration files and `supabase db push`, not pasted into the dashboard.

@@ -27,6 +27,7 @@ interface BookingRow {
   cancellation_reason: string | null;
   created_at: string;
 }
+interface CheckInRow { class_booking_id: string; checked_in_at: string; }
 
 function formatDateTime(value: string, timeZone: string) {
   return new Intl.DateTimeFormat("en-IN", {
@@ -69,7 +70,7 @@ export default async function ClassSessionBookingsPage({
   if (sessionResult.error || !session) notFound();
 
   const sessionDate = localDate(session.start_at, membership.organization.timezone);
-  const [programResult, bookingsResult, membershipsResult] = await Promise.all([
+  const [programResult, bookingsResult, membershipsResult, checkInsResult] = await Promise.all([
     supabase
       .from("class_programs")
       .select("name, code")
@@ -90,9 +91,15 @@ export default async function ClassSessionBookingsPage({
       .eq("lifecycle_state", "open")
       .lte("start_date", sessionDate)
       .gte("end_date", sessionDate),
+    supabase
+      .from("class_check_ins")
+      .select("class_booking_id, checked_in_at")
+      .eq("organization_id", membership.organization.id)
+      .eq("class_session_id", session.id),
   ]);
   const program = programResult.data as ProgramRow | null;
   const bookings = (bookingsResult.data ?? []) as BookingRow[];
+  const checkIns = new Map(((checkInsResult.data ?? []) as CheckInRow[]).map((checkIn) => [checkIn.class_booking_id, checkIn.checked_in_at]));
   const eligibleMemberIds = [...new Set(((membershipsResult.data ?? []) as MembershipRow[]).map((row) => row.member_id))];
   const bookedMemberIds = new Set(bookings.filter((booking) => booking.status !== "cancelled").map((booking) => booking.member_id));
   const allMemberIds = [...new Set([...eligibleMemberIds, ...bookings.map((booking) => booking.member_id)])];
@@ -115,7 +122,7 @@ export default async function ClassSessionBookingsPage({
   const waitlisted = activeBookings.filter((booking) => booking.status === "waitlisted");
   const cancelled = bookings.filter((booking) => booking.status === "cancelled");
   const branchName = membership.branches.find((branch) => branch.id === session.branch_id)?.name ?? "Branch";
-  const loadError = programResult.error || bookingsResult.error || membershipsResult.error || membersResult.error;
+  const loadError = programResult.error || bookingsResult.error || membershipsResult.error || checkInsResult.error || membersResult.error;
 
   return (
     <main className="px-5 py-8 sm:px-8 lg:px-10 lg:py-10">
@@ -154,11 +161,12 @@ export default async function ClassSessionBookingsPage({
               {[...confirmed, ...waitlisted].map((booking, index) => {
                 const member = membersById.get(booking.member_id);
                 const queuePosition = booking.status === "waitlisted" ? waitlisted.findIndex((candidate) => candidate.id === booking.id) + 1 : null;
+                const checkedInAt = checkIns.get(booking.id);
                 return (
                   <article className="grid gap-4 p-5 sm:grid-cols-[1fr_auto_auto] sm:items-center" key={booking.id}>
                     <div><p className="font-semibold">{member?.full_name ?? "Member"}</p><p className="mt-1 text-xs text-slate-500">{member?.member_code ?? `Roster ${index + 1}`}{booking.promoted_at ? " · promoted from waitlist" : ""}</p></div>
-                    <span className={`w-fit rounded-full px-3 py-1 text-xs font-semibold ${booking.status === "booked" ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-800"}`}>{booking.status === "booked" ? "Booked" : `Waitlist #${queuePosition}`}</span>
-                    {session.status === "scheduled" ? <CancelClassBookingForm organizationSlug={organizationSlug} classSessionId={session.id} classBookingId={booking.id} /> : null}
+                    <span className={`w-fit rounded-full px-3 py-1 text-xs font-semibold ${checkedInAt ? "bg-sky-50 text-sky-700" : booking.status === "booked" ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-800"}`}>{checkedInAt ? "Checked in" : booking.status === "booked" ? "Booked" : `Waitlist #${queuePosition}`}</span>
+                    {session.status === "scheduled" && !checkedInAt ? <CancelClassBookingForm organizationSlug={organizationSlug} classSessionId={session.id} classBookingId={booking.id} /> : checkedInAt ? <time className="text-xs text-slate-500">{formatDateTime(checkedInAt, membership.organization.timezone)}</time> : null}
                   </article>
                 );
               })}

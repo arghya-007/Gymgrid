@@ -71,6 +71,7 @@ export interface TenantMembership {
   canManageClassPrograms: boolean;
   canManageClassSessions: boolean;
   canManageClassBookings: boolean;
+  canManageClassCheckIns: boolean;
   canViewSubscription: boolean;
 }
 
@@ -257,6 +258,11 @@ export const getTenantSession = cache(async () => {
         ),
         canManageClassBookings: membershipRoles.some((assignment) =>
           ["gym_owner", "gym_manager", "receptionist"].includes(
+            assignment.role,
+          ),
+        ),
+        canManageClassCheckIns: membershipRoles.some((assignment) =>
+          ["gym_owner", "gym_manager", "receptionist", "trainer"].includes(
             assignment.role,
           ),
         ),
