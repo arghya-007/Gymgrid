@@ -32,10 +32,10 @@ The Phase 2 database and application gate is green: owners, managers, and recept
 - [x] Build secure plan enrolment and date-derived membership status.
 - [x] Build renewals, freezes, cancellations, and membership lifecycle actions.
 - [x] Build manual payment records and receipts.
-- [ ] Build member imports.
+- [x] Build member imports.
 - [ ] Build check-ins and operational reports.
 
-The completed Phase 3 slices preserve plan and price terms on every enrolment, prevent overlapping membership dates, enforce the subscription’s active-member allowance, add audited lifecycle workflows, and provide partial-payment collection with immutable printable receipts and audited voids. Payment collection is limited to authorized owners, managers, receptionists, and accountants; only owners, managers, and accountants may void a receipt.
+The completed Phase 3 slices preserve plan and price terms on every enrolment, prevent overlapping membership dates, enforce the subscription’s active-member allowance, add audited lifecycle workflows, and provide partial-payment collection with immutable printable receipts and audited voids. Payment collection is limited to authorized owners, managers, receptionists, and accountants; only owners, managers, and accountants may void a receipt. CSV imports validate and normalize up to 500 members before committing the entire batch atomically, with duplicate detection and branch-scoped authorization repeated inside Postgres.
 
 ## Phase 4 — Scheduling
 

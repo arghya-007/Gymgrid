@@ -80,6 +80,10 @@ export default async function MembersPage({
   );
   const createdCode =
     typeof query.created === "string" ? query.created.slice(0, 20) : "";
+  const importedValue = typeof query.imported === "string" ? Number(query.imported) : 0;
+  const importedCount = Number.isInteger(importedValue) && importedValue >= 1 && importedValue <= 500
+    ? importedValue
+    : 0;
 
   return (
     <main className="px-5 py-8 sm:px-8 lg:px-10 lg:py-10">
@@ -97,18 +101,32 @@ export default async function MembersPage({
             </p>
           </div>
           {membership.canManageMembers ? (
-            <Link
-              className="inline-flex w-fit rounded-xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700"
-              href={`/gym/${organizationSlug}/members/new`}
-            >
-              Add member
-            </Link>
+            <div className="flex flex-wrap gap-3">
+              <Link
+                className="inline-flex w-fit rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-400"
+                href={`/gym/${organizationSlug}/members/import`}
+              >
+                Import CSV
+              </Link>
+              <Link
+                className="inline-flex w-fit rounded-xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700"
+                href={`/gym/${organizationSlug}/members/new`}
+              >
+                Add member
+              </Link>
+            </div>
           ) : null}
         </div>
 
         {createdCode ? (
           <p className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800" role="status">
             Member {createdCode} was created successfully.
+          </p>
+        ) : null}
+
+        {importedCount ? (
+          <p className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800" role="status">
+            {importedCount} member{importedCount === 1 ? "" : "s"} imported successfully.
           </p>
         ) : null}
 
