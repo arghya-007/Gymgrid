@@ -28,6 +28,7 @@ interface MembershipRow {
   contract_amount_minor: number;
   currency: string;
   tax_inclusive: boolean;
+  cancellation_reason: string | null;
   created_at: string;
 }
 
@@ -73,7 +74,7 @@ export default async function MemberDetailPage({
     supabase
       .from("member_membership_statuses")
       .select(
-        "id, enrollment_code, plan_name, status, start_date, end_date, contract_amount_minor, currency, tax_inclusive, created_at",
+        "id, enrollment_code, plan_name, status, start_date, end_date, contract_amount_minor, currency, tax_inclusive, cancellation_reason, created_at",
       )
       .eq("organization_id", membership.organization.id)
       .eq("member_id", memberId)
@@ -94,6 +95,13 @@ export default async function MemberDetailPage({
   )?.name;
   const enrolledCode =
     typeof query.enrolled === "string" ? query.enrolled.slice(0, 20) : "";
+  const renewedCode =
+    typeof query.renewed === "string" ? query.renewed.slice(0, 20) : "";
+  const lifecycle =
+    typeof query.lifecycle === "string" &&
+    ["frozen", "resumed", "cancelled"].includes(query.lifecycle)
+      ? query.lifecycle
+      : "";
 
   return (
     <main className="px-5 py-8 sm:px-8 lg:px-10 lg:py-10">
@@ -108,6 +116,18 @@ export default async function MemberDetailPage({
         {enrolledCode ? (
           <p className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800" role="status">
             Enrolment {enrolledCode} was created successfully.
+          </p>
+        ) : null}
+
+        {renewedCode ? (
+          <p className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800" role="status">
+            Renewal {renewedCode} was created successfully.
+          </p>
+        ) : null}
+
+        {lifecycle ? (
+          <p className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800" role="status">
+            The membership was {lifecycle} successfully.
           </p>
         ) : null}
 
@@ -178,9 +198,26 @@ export default async function MemberDetailPage({
                     <p className="text-sm font-medium">{formatMoney(memberMembership.contract_amount_minor, memberMembership.currency)}</p>
                     <p className="mt-1 text-xs text-slate-400">Tax {memberMembership.tax_inclusive ? "included" : "excluded"}</p>
                   </div>
-                  <span className={`w-fit rounded-full px-3 py-1 text-xs font-semibold capitalize ${membershipStatusClassName(memberMembership.status)}`}>
-                    {memberMembership.status}
-                  </span>
+                  <div className="flex flex-wrap items-center gap-2 md:justify-end">
+                    <span className={`w-fit rounded-full px-3 py-1 text-xs font-semibold capitalize ${membershipStatusClassName(memberMembership.status)}`}>
+                      {memberMembership.status}
+                    </span>
+                    {membership.canManageMemberships && !["frozen", "cancelled"].includes(memberMembership.status) ? (
+                      <Link className="text-xs font-semibold text-emerald-700 hover:text-emerald-900" href={`/gym/${organizationSlug}/members/${member.id}/renew?from=${memberMembership.id}`}>
+                        Renew
+                      </Link>
+                    ) : null}
+                    {membership.canManageMemberships && ["active", "scheduled", "frozen"].includes(memberMembership.status) ? (
+                      <Link className="text-xs font-semibold text-slate-600 hover:text-slate-950" href={`/gym/${organizationSlug}/members/${member.id}/memberships/${memberMembership.id}/manage`}>
+                        Manage
+                      </Link>
+                    ) : null}
+                  </div>
+                  {memberMembership.cancellation_reason ? (
+                    <p className="text-xs text-rose-700 md:col-span-4">
+                      Cancellation reason: {memberMembership.cancellation_reason}
+                    </p>
+                  ) : null}
                 </article>
               ))}
             </div>
