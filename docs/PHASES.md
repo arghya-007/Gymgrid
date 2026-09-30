@@ -31,11 +31,11 @@ The Phase 2 database and application gate is green: owners, managers, and recept
 
 - [x] Build secure plan enrolment and date-derived membership status.
 - [x] Build renewals, freezes, cancellations, and membership lifecycle actions.
-- [ ] Build manual payment records and receipts.
+- [x] Build manual payment records and receipts.
 - [ ] Build member imports.
 - [ ] Build check-ins and operational reports.
 
-The first two Phase 3 slices preserve plan and price terms on every enrolment, prevent overlapping membership dates, enforce the subscription’s active-member allowance, and add audited renewal, freeze, resume, and cancellation workflows for owners, managers, and receptionists in their authorized branch scope.
+The completed Phase 3 slices preserve plan and price terms on every enrolment, prevent overlapping membership dates, enforce the subscription’s active-member allowance, add audited lifecycle workflows, and provide partial-payment collection with immutable printable receipts and audited voids. Payment collection is limited to authorized owners, managers, receptionists, and accountants; only owners, managers, and accountants may void a receipt.
 
 ## Phase 4 — Scheduling
 

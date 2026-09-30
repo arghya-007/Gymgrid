@@ -21,6 +21,7 @@
 | Plan catalogue | Manage | Read | Read | Read |
 | Leads | Read all | Manage own organization | Manage assigned scope | Receptionist manages assigned scope; others have no access |
 | Member memberships | Read all | Manage lifecycle in own organization | Manage lifecycle in assigned scope | Receptionist manages assigned scope; trainer/accountant read assigned scope |
+| Manual payments | Read all | Record and void in own organization | Record and void in assigned scope | Receptionist records assigned-scope payments; accountant records and voids; others have no access |
 
 Direct tenant-side membership, role, invitation, membership-plan, and lead writes remain blocked. Phase 2 exposes narrowly scoped security-definer functions: owners may invite managers and lower staff roles, organization-wide managers may invite only lower roles, and neither can grant gym-owner access. Invitations activate only after an authenticated user signs in with the exact invited email. Suspension and invitation revocation follow the same role hierarchy. Lead creation and updates require an owner, manager, or receptionist role in the selected branch; conversion creates the member and marks the lead won in one database transaction.
 
@@ -49,3 +50,5 @@ The test rolls back all fixtures and must run against a disposable local databas
 Each Phase 2 migration has a matching transaction-based test under `supabase/tests/`. The lead-management test covers authorized creation and updates, direct-write and cross-tenant blocking, denial for member roles, and atomic lead-to-member conversion. Every fixture is rolled back.
 
 Phase 3 membership writes also remain function-only. `enroll_member` rechecks organization, branch, member, plan, role, overlapping dates, and active-member allowance inside one transaction. The browser never supplies plan prices or calculated end dates; Postgres derives and snapshots them from the authorized plan record. `renew_membership`, `freeze_membership`, `resume_membership`, and `cancel_membership` repeat branch-role authorization in Postgres, preserve history and actor attribution, use the organization timezone, and prevent a resumed membership from overlapping a later enrolment.
+
+Manual payment writes are function-only. `record_manual_payment` locks the membership balance before accepting a partial payment, prevents overpayment, derives currency and member scope from the membership, and allocates an organization-specific receipt number. Receipts cannot be edited or deleted; authorized finance roles use `void_manual_payment`, which preserves the original amount and actor-attributed correction reason.

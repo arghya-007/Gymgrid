@@ -32,6 +32,12 @@ interface MembershipRow {
   created_at: string;
 }
 
+interface PaymentBalanceRow {
+  membership_id: string;
+  paid_amount_minor: number;
+  outstanding_amount_minor: number;
+}
+
 function formatDate(value: string) {
   return new Intl.DateTimeFormat("en-IN", {
     day: "numeric",
@@ -62,7 +68,7 @@ export default async function MemberDetailPage({
   const { membership, supabase } =
     await requireTenantMembership(organizationSlug);
 
-  const [memberResult, membershipsResult] = await Promise.all([
+  const [memberResult, membershipsResult, balancesResult] = await Promise.all([
     supabase
       .from("members")
       .select(
@@ -79,6 +85,11 @@ export default async function MemberDetailPage({
       .eq("organization_id", membership.organization.id)
       .eq("member_id", memberId)
       .order("start_date", { ascending: false }),
+    supabase
+      .from("membership_payment_balances")
+      .select("membership_id, paid_amount_minor, outstanding_amount_minor")
+      .eq("organization_id", membership.organization.id)
+      .eq("member_id", memberId),
   ]);
 
   if (memberResult.error) {
@@ -90,6 +101,12 @@ export default async function MemberDetailPage({
 
   const member = memberResult.data as MemberRow;
   const memberMemberships = (membershipsResult.data ?? []) as MembershipRow[];
+  const balances = new Map(
+    ((balancesResult.data ?? []) as PaymentBalanceRow[]).map((balance) => [
+      balance.membership_id,
+      balance,
+    ]),
+  );
   const branchName = membership.branches.find(
     (branch) => branch.id === member.home_branch_id,
   )?.name;
@@ -196,7 +213,11 @@ export default async function MemberDetailPage({
                   </p>
                   <div>
                     <p className="text-sm font-medium">{formatMoney(memberMembership.contract_amount_minor, memberMembership.currency)}</p>
-                    <p className="mt-1 text-xs text-slate-400">Tax {memberMembership.tax_inclusive ? "included" : "excluded"}</p>
+                    <p className="mt-1 text-xs text-slate-400">
+                      {balances.has(memberMembership.id)
+                        ? `${formatMoney(balances.get(memberMembership.id)!.paid_amount_minor, memberMembership.currency)} paid · ${formatMoney(balances.get(memberMembership.id)!.outstanding_amount_minor, memberMembership.currency)} due`
+                        : `Tax ${memberMembership.tax_inclusive ? "included" : "excluded"}`}
+                    </p>
                   </div>
                   <div className="flex flex-wrap items-center gap-2 md:justify-end">
                     <span className={`w-fit rounded-full px-3 py-1 text-xs font-semibold capitalize ${membershipStatusClassName(memberMembership.status)}`}>
@@ -210,6 +231,11 @@ export default async function MemberDetailPage({
                     {membership.canManageMemberships && ["active", "scheduled", "frozen"].includes(memberMembership.status) ? (
                       <Link className="text-xs font-semibold text-slate-600 hover:text-slate-950" href={`/gym/${organizationSlug}/members/${member.id}/memberships/${memberMembership.id}/manage`}>
                         Manage
+                      </Link>
+                    ) : null}
+                    {membership.canManagePayments && (balances.get(memberMembership.id)?.outstanding_amount_minor ?? 0) > 0 ? (
+                      <Link className="text-xs font-semibold text-amber-700 hover:text-amber-900" href={`/gym/${organizationSlug}/members/${member.id}/memberships/${memberMembership.id}/payments/new`}>
+                        Record payment
                       </Link>
                     ) : null}
                   </div>

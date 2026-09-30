@@ -15,7 +15,7 @@ The Expo mobile workspace will be introduced in Phase 5, after the authenticated
 
 ## Development status
 
-Phases 1 and 2 are complete and verified against the development Supabase project. Phase 3 is in progress: secure plan enrolment, date-derived membership status, historical plan-price snapshots, active-member allowance enforcement, and audited renewal, freeze, resume, and cancellation workflows are integrated into the Member CRM. Deployment, payment providers, messaging, and production infrastructure remain disconnected.
+Phases 1 and 2 are complete and verified against the development Supabase project. Phase 3 is in progress: secure enrolment and lifecycle management plus partial manual collections, outstanding balances, immutable printable receipts, and audited payment voids are integrated into the gym portal. Online payment providers, messaging, deployment, and production infrastructure remain disconnected.
 
 ## Local commands
 

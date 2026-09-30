@@ -190,7 +190,7 @@ export default async function GymDashboardPage({
             <div className="mt-6 rounded-2xl border border-slate-800 bg-slate-900 p-4">
               <p className="text-sm font-semibold">Next slice</p>
               <p className="mt-1 text-sm text-slate-400">
-                Record manual payments and issue receipts against member memberships.
+                Import existing members safely with validation and duplicate review.
               </p>
             </div>
           </section>
