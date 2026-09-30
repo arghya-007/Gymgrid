@@ -150,3 +150,73 @@ export async function cancelClassSession(
   revalidatePath(`/gym/${organizationSlug}/classes`);
   redirect(`/gym/${organizationSlug}/classes?cancelled=1`);
 }
+
+export async function bookClassMember(
+  organizationSlug: string,
+  classSessionId: string,
+  _previousState: ClassActionState,
+  formData: FormData,
+): Promise<ClassActionState> {
+  const memberId = textField(formData, "memberId");
+  if (!/^[0-9a-f-]{36}$/i.test(classSessionId) || !/^[0-9a-f-]{36}$/i.test(memberId)) {
+    return { status: "error", message: "Select a valid member for this class." };
+  }
+  const { membership, supabase } = await requireTenantMembership(organizationSlug);
+  if (!membership.canManageClassBookings) {
+    return { status: "error", message: "Your role cannot manage class bookings." };
+  }
+  const { data, error } = await supabase.rpc("book_class_session", {
+    p_organization_id: membership.organization.id,
+    p_class_session_id: classSessionId,
+    p_member_id: memberId,
+  });
+  if (error) {
+    console.error("Class booking failed", { code: error.code });
+    if (error.code === "23505") return { status: "error", message: "That member is already booked or waitlisted." };
+    if (error.code === "42501") return { status: "error", message: "Your role cannot book this member into the class." };
+    if (error.code === "22023") return { status: "error", message: "The member needs an active membership for this branch." };
+    return { status: "error", message: "The booking could not be completed. The class may have started or been cancelled." };
+  }
+
+  const booking = Array.isArray(data) ? data[0] : null;
+  const result = booking?.booking_status === "waitlisted" ? "waitlisted" : "booked";
+  const detailPath = `/gym/${organizationSlug}/classes/sessions/${classSessionId}`;
+  revalidatePath(`/gym/${organizationSlug}/classes`);
+  revalidatePath(detailPath);
+  redirect(`${detailPath}?${result}=1`);
+}
+
+export async function cancelMemberClassBooking(
+  organizationSlug: string,
+  classSessionId: string,
+  classBookingId: string,
+  _previousState: ClassActionState,
+  formData: FormData,
+): Promise<ClassActionState> {
+  const reason = textField(formData, "reason");
+  if (
+    !/^[0-9a-f-]{36}$/i.test(classSessionId) ||
+    !/^[0-9a-f-]{36}$/i.test(classBookingId) ||
+    reason.length < 2 ||
+    reason.length > 500
+  ) {
+    return { status: "error", message: "Enter a cancellation reason between 2 and 500 characters." };
+  }
+  const { membership, supabase } = await requireTenantMembership(organizationSlug);
+  if (!membership.canManageClassBookings) {
+    return { status: "error", message: "Your role cannot cancel class bookings." };
+  }
+  const { error } = await supabase.rpc("cancel_class_booking", {
+    p_organization_id: membership.organization.id,
+    p_class_booking_id: classBookingId,
+    p_reason: reason,
+  });
+  if (error) {
+    console.error("Class booking cancellation failed", { code: error.code });
+    return { status: "error", message: "The booking could not be cancelled. The class may have started or changed." };
+  }
+  const detailPath = `/gym/${organizationSlug}/classes/sessions/${classSessionId}`;
+  revalidatePath(`/gym/${organizationSlug}/classes`);
+  revalidatePath(detailPath);
+  redirect(`${detailPath}?bookingCancelled=1`);
+}

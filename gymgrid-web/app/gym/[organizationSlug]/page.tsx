@@ -185,12 +185,12 @@ export default async function GymDashboardPage({
               Scheduling is underway
             </h2>
             <p className="mt-3 text-sm leading-6 text-slate-400">
-              Branch class types, trainer-aware sessions, capacity snapshots, and audited cancellation now share the secure tenant workspace.
+              Branch class types, trainer-aware sessions, capacity-safe bookings, ordered waitlists, and audited cancellation now share the secure tenant workspace.
             </p>
             <div className="mt-6 rounded-2xl border border-slate-800 bg-slate-900 p-4">
               <p className="text-sm font-semibold">Next slice</p>
               <p className="mt-1 text-sm text-slate-400">
-                Member bookings, waitlists, and automatic promotion.
+                Class kiosk mode and secure QR check-in.
               </p>
             </div>
           </section>
