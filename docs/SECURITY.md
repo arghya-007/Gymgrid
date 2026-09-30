@@ -15,12 +15,12 @@
 | --- | --- | --- | --- | --- |
 | Organizations | Manage all | Read own | Read own | Read own |
 | Branches | Manage all | Create/update own | Create/update own when organization-wide | Read assigned scope |
-| Tenant users and roles | Manage all | Read own organization | Read own organization when organization-wide | Read self |
+| Tenant users and roles | Manage all | Invite and manage non-owner staff | Invite and manage lower roles when organization-wide | Read self |
 | SaaS subscriptions | Manage all | Read own | Read own when organization-wide | Accountant can read own |
 | Audit log | Read all | Read own organization | No access | No access |
 | Plan catalogue | Manage | Read | Read | Read |
 
-Direct tenant-side membership and role writes are intentionally blocked in Phase 1. Phase 2 will add narrowly scoped database functions for owner-managed staff invitations without permitting privilege escalation.
+Direct tenant-side membership, role, and invitation writes remain blocked. Phase 2 exposes narrowly scoped security-definer functions: owners may invite managers and lower staff roles, organization-wide managers may invite only lower roles, and neither can grant gym-owner access. Invitations activate only after an authenticated user signs in with the exact invited email. Suspension and invitation revocation follow the same role hierarchy.
 
 ## First platform administrator
 

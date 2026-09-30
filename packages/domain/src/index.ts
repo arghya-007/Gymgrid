@@ -22,6 +22,24 @@ export const organizationStatusValues = [
 
 export type OrganizationStatus = (typeof organizationStatusValues)[number];
 
+export const organizationUserStatusValues = [
+  "invited",
+  "active",
+  "suspended",
+] as const;
+
+export type OrganizationUserStatus =
+  (typeof organizationUserStatusValues)[number];
+
+export const invitationStatusValues = [
+  "pending",
+  "accepted",
+  "revoked",
+  "expired",
+] as const;
+
+export type InvitationStatus = (typeof invitationStatusValues)[number];
+
 export const memberRecordStatusValues = [
   "active",
   "inactive",

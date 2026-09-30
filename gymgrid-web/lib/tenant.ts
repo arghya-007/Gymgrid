@@ -61,6 +61,7 @@ export interface TenantMembership {
   canManageOrganization: boolean;
   canManageMembers: boolean;
   canManageMembershipPlans: boolean;
+  canManageTeam: boolean;
   canViewSubscription: boolean;
 }
 
@@ -84,6 +85,16 @@ export const tenantRoleLabels: Record<TenantRole, string> = {
 
 export const getTenantSession = cache(async () => {
   const { supabase, user } = await requireAuthenticatedUser();
+  const invitationResult = await supabase.rpc(
+    "accept_my_organization_invitations",
+  );
+
+  if (invitationResult.error) {
+    console.error("Pending staff invitations could not be accepted", {
+      code: invitationResult.error.code,
+    });
+  }
+
   const { data: membershipData, error: membershipError } = await supabase
     .from("organization_users")
     .select("id, organization_id, status")
@@ -186,6 +197,9 @@ export const getTenantSession = cache(async () => {
         canManageMembershipPlans: membershipRoles.some((assignment) =>
           ["gym_owner", "gym_manager"].includes(assignment.role),
         ),
+        canManageTeam:
+          hasOrganizationRole("gym_owner") ||
+          hasOrganizationRole("gym_manager"),
         canViewSubscription:
           hasOrganizationRole("gym_owner") ||
           hasOrganizationRole("gym_manager") ||
