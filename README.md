@@ -15,7 +15,7 @@ The Expo mobile workspace will be introduced in Phase 5, after the authenticated
 
 ## Development status
 
-Phase 1 is complete and verified against the development Supabase project. Phase 2 is in progress: the tenant dashboard, Member CRM, membership-plan catalogue, and secure staff invitations with branch-scoped roles are implemented. Deployment, payment providers, messaging, and production infrastructure remain disconnected.
+Phases 1 and 2 are complete and verified against the development Supabase project. The tenant dashboard, Member CRM, membership-plan catalogue, secure staff management, and lead-to-member pipeline are implemented with tenant and branch isolation. Deployment, payment providers, messaging, and production infrastructure remain disconnected.
 
 ## Local commands
 

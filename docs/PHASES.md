@@ -23,7 +23,9 @@ The Phase 1 database gate is green: all 16 expected tables have RLS enabled, the
 - [x] Build the Member CRM list, search, and secure create-member flow.
 - [x] Build membership-plan management.
 - [x] Build staff management and secure invitation workflows.
-- [ ] Build lead capture and conversion workflows.
+- [x] Build lead capture and conversion workflows.
+
+The Phase 2 database and application gate is green: owners, managers, and receptionists can manage only the leads in their authorized branch scope; direct writes and cross-tenant access remain blocked; and lead conversion creates the member record and closes the lead atomically.
 
 ## Phase 3 — Operations
 

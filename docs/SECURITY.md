@@ -19,8 +19,9 @@
 | SaaS subscriptions | Manage all | Read own | Read own when organization-wide | Accountant can read own |
 | Audit log | Read all | Read own organization | No access | No access |
 | Plan catalogue | Manage | Read | Read | Read |
+| Leads | Read all | Manage own organization | Manage assigned scope | Receptionist manages assigned scope; others have no access |
 
-Direct tenant-side membership, role, and invitation writes remain blocked. Phase 2 exposes narrowly scoped security-definer functions: owners may invite managers and lower staff roles, organization-wide managers may invite only lower roles, and neither can grant gym-owner access. Invitations activate only after an authenticated user signs in with the exact invited email. Suspension and invitation revocation follow the same role hierarchy.
+Direct tenant-side membership, role, invitation, membership-plan, and lead writes remain blocked. Phase 2 exposes narrowly scoped security-definer functions: owners may invite managers and lower staff roles, organization-wide managers may invite only lower roles, and neither can grant gym-owner access. Invitations activate only after an authenticated user signs in with the exact invited email. Suspension and invitation revocation follow the same role hierarchy. Lead creation and updates require an owner, manager, or receptionist role in the selected branch; conversion creates the member and marks the lead won in one database transaction.
 
 ## First platform administrator
 
@@ -43,3 +44,5 @@ After bootstrap, platform administrators may manage other platform administrator
 4. A platform administrator sees all tenants and can call the atomic onboarding function.
 
 The test rolls back all fixtures and must run against a disposable local database, never production.
+
+Each Phase 2 migration has a matching transaction-based test under `supabase/tests/`. The lead-management test covers authorized creation and updates, direct-write and cross-tenant blocking, denial for member roles, and atomic lead-to-member conversion. Every fixture is rolled back.

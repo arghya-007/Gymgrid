@@ -182,15 +182,15 @@ export default async function GymDashboardPage({
               Phase 2
             </p>
             <h2 className="mt-3 text-2xl font-semibold tracking-tight">
-              Admin foundation is ready
+              Gym administration is ready
             </h2>
             <p className="mt-3 text-sm leading-6 text-slate-400">
-              This dashboard is backed by live tenant, role, branch, and subscription data. Member CRM, membership plans, and secure staff access are now available; lead workflows remain the final Phase 2 slice.
+              Phase 2 is complete. Member CRM, membership plans, secure staff access, and the lead-to-member pipeline are backed by live tenant, role, branch, and subscription data.
             </p>
             <div className="mt-6 rounded-2xl border border-slate-800 bg-slate-900 p-4">
-              <p className="text-sm font-semibold">Next slice</p>
+              <p className="text-sm font-semibold">Next phase</p>
               <p className="mt-1 text-sm text-slate-400">
-                Lead capture, follow-up status, and conversion into member records.
+                Enrolments, renewals, membership lifecycle, payments, receipts, check-ins, and operational reports.
               </p>
             </div>
           </section>

@@ -67,6 +67,29 @@ export const membershipPlanDurationUnitValues = [
 export type MembershipPlanDurationUnit =
   (typeof membershipPlanDurationUnitValues)[number];
 
+export const leadStatusValues = [
+  "new",
+  "contacted",
+  "trial_scheduled",
+  "won",
+  "lost",
+] as const;
+
+export type LeadStatus = (typeof leadStatusValues)[number];
+
+export const leadSourceValues = [
+  "walk_in",
+  "referral",
+  "website",
+  "instagram",
+  "facebook",
+  "whatsapp",
+  "phone",
+  "other",
+] as const;
+
+export type LeadSource = (typeof leadSourceValues)[number];
+
 export interface TenantScope {
   organizationId: string;
   branchId?: string;
