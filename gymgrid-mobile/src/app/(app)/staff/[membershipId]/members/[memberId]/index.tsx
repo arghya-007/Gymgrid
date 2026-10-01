@@ -1,0 +1,312 @@
+import { router, type Href, useLocalSearchParams } from "expo-router";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  ActivityIndicator,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
+import { Brand } from "@/components/brand";
+import { PrimaryButton } from "@/components/primary-button";
+import { colors } from "@/constants/colors";
+import {
+  formatGymDate,
+  formatMoney,
+  loadStaffMember,
+  type StaffMember,
+} from "@/lib/staff-data";
+import { supabase } from "@/lib/supabase";
+import { useWorkspaces } from "@/providers/workspace-provider";
+
+interface MembershipRow {
+  id: string;
+  enrollment_code: string;
+  plan_name: string;
+  status: "active" | "scheduled" | "frozen" | "expired" | "cancelled";
+  start_date: string;
+  end_date: string;
+  contract_amount_minor: number;
+  currency: string;
+}
+
+interface BalanceRow {
+  membership_id: string;
+  paid_amount_minor: number;
+  outstanding_amount_minor: number;
+}
+
+export default function StaffMemberDetailScreen() {
+  const { membershipId, memberId, created, enrolled } = useLocalSearchParams<{
+    membershipId: string;
+    memberId: string;
+    created?: string;
+    enrolled?: string;
+  }>();
+  const { workspaces } = useWorkspaces();
+  const workspace = workspaces.find(
+    (candidate) => candidate.membershipId === membershipId,
+  );
+  const [member, setMember] = useState<StaffMember | null>(null);
+  const [memberships, setMemberships] = useState<MembershipRow[]>([]);
+  const [balances, setBalances] = useState<BalanceRow[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const refresh = useCallback(async () => {
+    if (!workspace?.hasStaffMode || !memberId) {
+      setError("This member workspace is no longer available.");
+      setIsLoading(false);
+      return;
+    }
+
+    setError(null);
+    setIsLoading(true);
+
+    try {
+      const memberProfile = await loadStaffMember(
+        workspace.organization.id,
+        memberId,
+      );
+      if (!memberProfile) throw new Error("This member is not in your branch scope.");
+
+      const [membershipsResult, balancesResult] = await Promise.all([
+        supabase
+          .from("member_membership_statuses")
+          .select(
+            "id, enrollment_code, plan_name, status, start_date, end_date, contract_amount_minor, currency",
+          )
+          .eq("organization_id", workspace.organization.id)
+          .eq("member_id", memberId)
+          .order("start_date", { ascending: false }),
+        supabase
+          .from("membership_payment_balances")
+          .select(
+            "membership_id, paid_amount_minor, outstanding_amount_minor",
+          )
+          .eq("organization_id", workspace.organization.id)
+          .eq("member_id", memberId),
+      ]);
+
+      const firstError = membershipsResult.error ?? balancesResult.error;
+      if (firstError) throw firstError;
+
+      setMember(memberProfile);
+      setMemberships((membershipsResult.data ?? []) as MembershipRow[]);
+      setBalances((balancesResult.data ?? []) as BalanceRow[]);
+    } catch (cause) {
+      console.error("Staff member details could not be loaded", cause);
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : "The member details could not be loaded.",
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  }, [memberId, workspace]);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => void refresh(), 0);
+    return () => clearTimeout(timeoutId);
+  }, [refresh]);
+
+  const balanceByMembership = useMemo(
+    () => new Map(balances.map((balance) => [balance.membership_id, balance])),
+    [balances],
+  );
+
+  if (!workspace) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.centerState}>
+          <Text style={styles.stateTitle}>Workspace unavailable</Text>
+          <PrimaryButton label="Back" onPress={() => router.replace("/")} />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  const branch = workspace.branches.find(
+    (candidate) => candidate.id === member?.homeBranchId,
+  );
+
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        refreshControl={
+          <RefreshControl
+            colors={[colors.accent]}
+            onRefresh={() => void refresh()}
+            refreshing={isLoading}
+            tintColor={colors.accent}
+          />
+        }
+      >
+        <View style={styles.topBar}>
+          <Brand compact />
+          <Pressable onPress={() => router.back()}>
+            <Text style={styles.backText}>Members</Text>
+          </Pressable>
+        </View>
+
+        {created && (
+          <View style={styles.successCard}>
+            <Text style={styles.successText}>
+              Member {String(created).slice(0, 20)} was created. Add their first plan when ready.
+            </Text>
+          </View>
+        )}
+        {enrolled && (
+          <View style={styles.successCard}>
+            <Text style={styles.successText}>
+              Enrolment {String(enrolled).slice(0, 20)} was created successfully.
+            </Text>
+          </View>
+        )}
+
+        {isLoading && !member ? (
+          <View style={styles.centerState}>
+            <ActivityIndicator color={colors.accent} size="large" />
+            <Text style={styles.stateText}>Loading member…</Text>
+          </View>
+        ) : error || !member ? (
+          <View style={styles.centerState}>
+            <Text style={styles.errorTitle}>Member unavailable</Text>
+            <Text style={styles.stateText}>{error ?? "This member could not be found."}</Text>
+            <PrimaryButton label="Try again" onPress={() => void refresh()} />
+          </View>
+        ) : (
+          <>
+            <View style={styles.profileCard}>
+              <View style={styles.profileTop}>
+                <View style={styles.profileCopy}>
+                  <Text style={styles.memberCode}>{member.memberCode}</Text>
+                  <Text style={styles.memberName}>{member.fullName}</Text>
+                  <Text style={styles.memberMeta}>
+                    {member.phone}{member.email ? ` · ${member.email}` : ""}
+                  </Text>
+                </View>
+                <Text style={styles.profileStatus}>{member.status}</Text>
+              </View>
+              <View style={styles.branchStrip}>
+                <Text style={styles.branchLabel}>HOME BRANCH</Text>
+                <Text style={styles.branchName}>
+                  {branch?.name ?? "Assigned branch"}
+                </Text>
+              </View>
+              {workspace.canManageMemberships && member.status === "active" && (
+                <PrimaryButton
+                  label="Enrol in a plan"
+                  onPress={() =>
+                    router.push(
+                      `/staff/${workspace.membershipId}/members/${member.id}/enroll` as Href,
+                    )
+                  }
+                />
+              )}
+            </View>
+
+            <View style={styles.sectionHeading}>
+              <Text style={styles.sectionTitle}>Membership history</Text>
+              <Text style={styles.sectionSubtitle}>
+                Preserved plan terms and current payment balance.
+              </Text>
+            </View>
+
+            {memberships.length === 0 ? (
+              <View style={styles.emptyCard}>
+                <Text style={styles.stateTitle}>No enrolments yet</Text>
+                <Text style={styles.stateText}>
+                  Assign the member’s first active plan from this device.
+                </Text>
+              </View>
+            ) : (
+              <View style={styles.list}>
+                {memberships.map((membership) => {
+                  const balance = balanceByMembership.get(membership.id);
+                  return (
+                    <View key={membership.id} style={styles.membershipCard}>
+                      <View style={styles.rowBetween}>
+                        <View style={styles.flexCopy}>
+                          <Text style={styles.planName}>{membership.plan_name}</Text>
+                          <Text style={styles.enrollmentCode}>
+                            {membership.enrollment_code}
+                          </Text>
+                        </View>
+                        <Text style={styles.membershipStatus}>
+                          {membership.status}
+                        </Text>
+                      </View>
+                      <Text style={styles.membershipMeta}>
+                        {formatGymDate(membership.start_date)} – {formatGymDate(membership.end_date)}
+                      </Text>
+                      <View style={styles.balanceRow}>
+                        <Text style={styles.balanceText}>
+                          {formatMoney(
+                            balance?.paid_amount_minor ?? 0,
+                            membership.currency,
+                          )} paid
+                        </Text>
+                        <Text style={styles.dueText}>
+                          {formatMoney(
+                            balance?.outstanding_amount_minor ??
+                              membership.contract_amount_minor,
+                            membership.currency,
+                          )} due
+                        </Text>
+                      </View>
+                    </View>
+                  );
+                })}
+              </View>
+            )}
+          </>
+        )}
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  safeArea: { backgroundColor: colors.canvas, flex: 1 },
+  content: { alignSelf: "center", maxWidth: 720, padding: 22, paddingBottom: 44, width: "100%" },
+  topBar: { alignItems: "center", flexDirection: "row", justifyContent: "space-between", marginBottom: 30 },
+  backText: { color: colors.accentDark, fontSize: 14, fontWeight: "800" },
+  successCard: { backgroundColor: colors.accentSoft, borderRadius: 14, marginBottom: 14, padding: 14 },
+  successText: { color: colors.accentDeep, fontSize: 13, fontWeight: "700" },
+  profileCard: { backgroundColor: colors.surface, borderColor: colors.line, borderRadius: 24, borderWidth: 1, gap: 18, padding: 21 },
+  profileTop: { alignItems: "flex-start", flexDirection: "row", gap: 14 },
+  profileCopy: { flex: 1 },
+  memberCode: { color: colors.accentDark, fontSize: 11, fontWeight: "900", letterSpacing: 1 },
+  memberName: { color: colors.ink, fontSize: 28, fontWeight: "900", letterSpacing: -0.8, marginTop: 5 },
+  memberMeta: { color: colors.inkMuted, fontSize: 13, lineHeight: 19, marginTop: 7 },
+  profileStatus: { color: colors.accentDark, fontSize: 10, fontWeight: "900", textTransform: "uppercase" },
+  branchStrip: { backgroundColor: colors.surfaceMuted, borderRadius: 13, padding: 13 },
+  branchLabel: { color: colors.inkMuted, fontSize: 9, fontWeight: "900", letterSpacing: 0.8 },
+  branchName: { color: colors.ink, fontSize: 14, fontWeight: "800", marginTop: 4 },
+  sectionHeading: { marginBottom: 12, marginTop: 30 },
+  sectionTitle: { color: colors.ink, fontSize: 21, fontWeight: "900" },
+  sectionSubtitle: { color: colors.inkMuted, fontSize: 13, marginTop: 4 },
+  list: { gap: 11 },
+  membershipCard: { backgroundColor: colors.surface, borderColor: colors.line, borderRadius: 18, borderWidth: 1, gap: 9, padding: 17 },
+  rowBetween: { alignItems: "flex-start", flexDirection: "row", gap: 12 },
+  flexCopy: { flex: 1 },
+  planName: { color: colors.ink, fontSize: 17, fontWeight: "900" },
+  enrollmentCode: { color: colors.accentDark, fontSize: 10, fontWeight: "800", marginTop: 3 },
+  membershipStatus: { color: colors.accentDark, fontSize: 9, fontWeight: "900", textTransform: "uppercase" },
+  membershipMeta: { color: colors.inkMuted, fontSize: 12 },
+  balanceRow: { flexDirection: "row", gap: 15 },
+  balanceText: { color: colors.accentDark, fontSize: 12, fontWeight: "800" },
+  dueText: { color: colors.warning, fontSize: 12, fontWeight: "800" },
+  emptyCard: { alignItems: "center", backgroundColor: colors.surface, borderColor: colors.line, borderRadius: 18, borderWidth: 1, gap: 8, padding: 26 },
+  centerState: { alignItems: "center", backgroundColor: colors.surface, borderColor: colors.line, borderRadius: 20, borderWidth: 1, gap: 14, padding: 28 },
+  stateTitle: { color: colors.ink, fontSize: 20, fontWeight: "900", textAlign: "center" },
+  errorTitle: { color: colors.danger, fontSize: 20, fontWeight: "900" },
+  stateText: { color: colors.inkMuted, fontSize: 14, lineHeight: 21, textAlign: "center" },
+});

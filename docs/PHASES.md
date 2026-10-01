@@ -56,9 +56,12 @@ The Phase 4 gate is green. Member QR passes are rotatable and immediately revoke
 - [x] Create the Expo workspace with persisted authentication and protected routes.
 - [x] Build the role-aware owner/staff and member workspace switcher foundation.
 - [x] Build member class bookings, QR pass, membership history, and payment history.
-- [ ] Build mobile owner/staff member enrolment, plan lifecycle, and collection actions.
+- [x] Build the mobile owner/staff member directory, creation, and plan enrolment flow.
+- [ ] Add mobile membership renew, freeze, cancel, and payment collection actions.
 
 The Phase 5 member slice is live. The Android-first client uses the same public Supabase project and RLS boundary as the web portal, persists sessions locally with Expo SQLite, discovers every active tenant role for the signed-in user, and exposes separate member and owner/staff modes without duplicating accounts. Linked members can now book or cancel classes, manage a rotating QR pass, and review only their own preserved membership terms and payment receipts. The live self-service RLS test passed and rolled all fixtures back to zero.
+
+The first owner/staff mobile slice is also ready. Authorized staff can search their branch-scoped member directory, create a normalized member contact, inspect preserved membership and balance history, and assign an active compatible plan through the same secured database functions as the web portal. Role capability checks control each entry point while Postgres remains the final authorization boundary.
 
 ## Phase 6 — Pilot quality
 

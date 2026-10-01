@@ -19,18 +19,22 @@ const roleLabels: Record<TenantRole, string> = {
 
 const staffActions = [
   {
-    title: "Members & plans",
-    description: "Find members, review access, and update plan details.",
+    key: "members",
+    title: "Members",
+    description: "Find members and review their plan and balance.",
   },
   {
-    title: "Enrol a member",
-    description: "Create a member and assign their first membership.",
+    key: "new-member",
+    title: "Add & enrol member",
+    description: "Create a member, then assign their first plan.",
   },
   {
+    key: "collections",
     title: "Collections",
     description: "Record and review manual membership payments.",
   },
   {
+    key: "classes",
     title: "Classes & bookings",
     description: "Manage sessions, rosters, waitlists, and attendance.",
   },
@@ -112,6 +116,15 @@ export default function WorkspaceHomeScreen() {
     }
   };
 
+  const openStaffAction = (key: string) => {
+    if (key === "members") {
+      router.push(`/staff/${workspace.membershipId}/members` as Href);
+    }
+    if (key === "new-member") {
+      router.push(`/staff/${workspace.membershipId}/members/new` as Href);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.content}>
@@ -148,19 +161,26 @@ export default function WorkspaceHomeScreen() {
 
         <View style={styles.actionList}>
           {actions.map((action, index) => {
-            const actionKey = "key" in action ? action.key : null;
-            const isAvailable =
+            const actionKey = action.key;
+            const isMemberAction =
               requestedMode === "member" &&
               (actionKey === "classes" ||
                 actionKey === "pass" ||
                 actionKey === "membership");
+            const isStaffAction =
+              requestedMode === "staff" &&
+              (actionKey === "members" ||
+                (actionKey === "new-member" && workspace.canManageMembers));
+            const isAvailable = isMemberAction || isStaffAction;
             return (
               <Pressable
                 disabled={!isAvailable}
                 key={action.title}
                 onPress={
-                  isAvailable && actionKey
+                  isMemberAction
                     ? () => openMemberAction(actionKey)
+                    : isStaffAction
+                      ? () => openStaffAction(actionKey)
                     : undefined
                 }
                 style={({ pressed }) => [

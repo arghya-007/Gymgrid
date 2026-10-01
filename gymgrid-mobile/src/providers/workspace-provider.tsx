@@ -51,6 +51,9 @@ export interface TenantWorkspace {
   branches: Pick<BranchRow, "id" | "code" | "name">[];
   hasMemberMode: boolean;
   hasStaffMode: boolean;
+  canManageMembers: boolean;
+  canManageMemberships: boolean;
+  canManagePayments: boolean;
 }
 
 interface WorkspaceContextValue {
@@ -139,6 +142,8 @@ async function loadWorkspaces(userId: string): Promise<TenantWorkspace[]> {
     const hasOrganizationWideAccess = membershipRoles.some(
       (role) => role.branchId === null,
     );
+    const hasRole = (allowedRoles: TenantRole[]) =>
+      membershipRoles.some((assignment) => allowedRoles.includes(assignment.role));
 
     return [
       {
@@ -155,6 +160,22 @@ async function loadWorkspaces(userId: string): Promise<TenantWorkspace[]> {
           .map(({ id, code, name }) => ({ id, code, name })),
         hasMemberMode: membershipRoles.some((role) => role.role === "member"),
         hasStaffMode: membershipRoles.some((role) => role.role !== "member"),
+        canManageMembers: hasRole([
+          "gym_owner",
+          "gym_manager",
+          "receptionist",
+        ]),
+        canManageMemberships: hasRole([
+          "gym_owner",
+          "gym_manager",
+          "receptionist",
+        ]),
+        canManagePayments: hasRole([
+          "gym_owner",
+          "gym_manager",
+          "receptionist",
+          "accountant",
+        ]),
       },
     ];
   });
