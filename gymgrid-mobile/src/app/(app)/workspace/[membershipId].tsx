@@ -1,5 +1,5 @@
 import type { TenantRole } from "@gymgrid/domain";
-import { router, useLocalSearchParams } from "expo-router";
+import { router, type Href, useLocalSearchParams } from "expo-router";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -38,14 +38,17 @@ const staffActions = [
 
 const memberActions = [
   {
+    key: "classes",
     title: "My class bookings",
     description: "Book a session, view your place, or leave a waitlist.",
   },
   {
+    key: "pass",
     title: "My QR pass",
     description: "Open your rotating pass for class and reception check-in.",
   },
   {
+    key: "membership",
     title: "My membership",
     description: "See plan status, dates, branch, and payment history.",
   },
@@ -95,6 +98,20 @@ export default function WorkspaceHomeScreen() {
     .filter((label, index, labels) => labels.indexOf(label) === index)
     .join(" · ");
 
+  const openMemberAction = (key: string) => {
+    if (key === "classes") {
+      router.push(
+        `/member/${workspace.membershipId}/classes` as Href,
+      );
+    }
+    if (key === "pass") {
+      router.push(`/member/${workspace.membershipId}/pass` as Href);
+    }
+    if (key === "membership") {
+      router.push(`/member/${workspace.membershipId}/membership` as Href);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.content}>
@@ -130,20 +147,44 @@ export default function WorkspaceHomeScreen() {
         </View>
 
         <View style={styles.actionList}>
-          {actions.map((action, index) => (
-            <View key={action.title} style={styles.actionCard}>
-              <View style={styles.actionNumber}>
-                <Text style={styles.actionNumberText}>{index + 1}</Text>
-              </View>
-              <View style={styles.actionCopy}>
-                <Text style={styles.actionTitle}>{action.title}</Text>
-                <Text style={styles.actionDescription}>{action.description}</Text>
-                <Text style={styles.comingNext}>
-                  AVAILABLE IN THE NEXT MOBILE SLICE
-                </Text>
-              </View>
-            </View>
-          ))}
+          {actions.map((action, index) => {
+            const actionKey = "key" in action ? action.key : null;
+            const isAvailable =
+              requestedMode === "member" &&
+              (actionKey === "classes" ||
+                actionKey === "pass" ||
+                actionKey === "membership");
+            return (
+              <Pressable
+                disabled={!isAvailable}
+                key={action.title}
+                onPress={
+                  isAvailable && actionKey
+                    ? () => openMemberAction(actionKey)
+                    : undefined
+                }
+                style={({ pressed }) => [
+                  styles.actionCard,
+                  pressed && styles.actionPressed,
+                ]}
+              >
+                <View style={styles.actionNumber}>
+                  <Text style={styles.actionNumberText}>{index + 1}</Text>
+                </View>
+                <View style={styles.actionCopy}>
+                  <Text style={styles.actionTitle}>{action.title}</Text>
+                  <Text style={styles.actionDescription}>
+                    {action.description}
+                  </Text>
+                  <Text style={styles.comingNext}>
+                    {isAvailable
+                      ? "OPEN"
+                      : "AVAILABLE IN THE NEXT MOBILE SLICE"}
+                  </Text>
+                </View>
+              </Pressable>
+            );
+          })}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -218,6 +259,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     padding: 18,
   },
+  actionPressed: { opacity: 0.78 },
   actionNumber: {
     alignItems: "center",
     backgroundColor: colors.accentSoft,

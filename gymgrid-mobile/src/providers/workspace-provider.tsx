@@ -22,6 +22,7 @@ interface OrganizationRow {
   name: string;
   slug: string;
   status: "trial" | "active" | "suspended" | "cancelled";
+  timezone: string;
 }
 
 interface RoleRow {
@@ -95,7 +96,7 @@ async function loadWorkspaces(userId: string): Promise<TenantWorkspace[]> {
   const [organizationsResult, rolesResult, branchesResult] = await Promise.all([
     supabase
       .from("organizations")
-      .select("id, name, slug, status")
+      .select("id, name, slug, status, timezone")
       .in("id", organizationIds),
     supabase
       .from("organization_user_roles")
