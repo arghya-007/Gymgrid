@@ -53,9 +53,12 @@ The Phase 4 gate is green. Member QR passes are rotatable and immediately revoke
 
 ## Phase 5 — Android application
 
-- Create the Expo workspace.
-- Build member workflows and the owner/staff workspace switcher.
-- Add member QR pass, bookings, enrolment, plan changes, and collection actions.
+- [x] Create the Expo workspace with persisted authentication and protected routes.
+- [x] Build the role-aware owner/staff and member workspace switcher foundation.
+- [ ] Build member workflows.
+- [ ] Add member QR pass, bookings, enrolment, plan changes, and collection actions.
+
+The Phase 5 foundation is now in the monorepo. The Android-first client uses the same public Supabase project and RLS boundary as the web portal, persists sessions locally with Expo SQLite, discovers every active tenant role for the signed-in user, and exposes separate member and owner/staff modes without duplicating accounts.
 
 ## Phase 6 — Pilot quality
 

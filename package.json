@@ -5,17 +5,27 @@
   "description": "GymGrid multi-tenant gym management SaaS",
   "workspaces": [
     "gymgrid-web",
+    "gymgrid-mobile",
     "packages/*"
   ],
   "scripts": {
     "dev:web": "npm run dev --workspace=gymgrid-web",
     "dev:web:system-ca": "npm run dev:system-ca --workspace=gymgrid-web",
+    "dev:mobile": "npm run start --workspace=gymgrid-mobile",
+    "android:mobile": "npm run android --workspace=gymgrid-mobile",
     "build:web": "npm run build --workspace=gymgrid-web",
-    "lint": "npm run lint --workspace=gymgrid-web",
+    "lint": "npm run lint --workspace=gymgrid-web && npm run lint --workspace=gymgrid-mobile",
+    "typecheck:mobile": "npm run typecheck --workspace=gymgrid-mobile",
+    "doctor:mobile": "npm run doctor --workspace=gymgrid-mobile",
     "typecheck:domain": "npm run typecheck --workspace=@gymgrid/domain"
   },
   "engines": {
     "node": ">=22.0.0",
     "npm": ">=10.0.0"
+  },
+  "devDependencies": {
+    "eslint": "9.39.5",
+    "react": "19.2.3",
+    "react-dom": "19.2.3"
   }
 }
