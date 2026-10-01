@@ -16,6 +16,7 @@ interface MemberRow {
   status: "active" | "inactive" | "archived";
   home_branch_id: string;
   created_at: string;
+  photo_path: string | null;
 }
 
 interface MembershipRow {
@@ -72,7 +73,7 @@ export default async function MemberDetailPage({
     supabase
       .from("members")
       .select(
-        "id, member_code, full_name, preferred_name, email, phone, status, home_branch_id, created_at",
+        "id, member_code, full_name, preferred_name, email, phone, status, home_branch_id, created_at, photo_path",
       )
       .eq("organization_id", membership.organization.id)
       .eq("id", memberId)
@@ -100,6 +101,13 @@ export default async function MemberDetailPage({
   }
 
   const member = memberResult.data as MemberRow;
+  let photoUrl: string | null = null;
+  if (member.photo_path) {
+    const signedResult = await supabase.storage
+      .from("member-photos")
+      .createSignedUrl(member.photo_path, 3600);
+    photoUrl = signedResult.data?.signedUrl ?? null;
+  }
   const memberMemberships = (membershipsResult.data ?? []) as MembershipRow[];
   const balances = new Map(
     ((balancesResult.data ?? []) as PaymentBalanceRow[]).map((balance) => [
@@ -119,6 +127,7 @@ export default async function MemberDetailPage({
     ["frozen", "resumed", "cancelled"].includes(query.lifecycle)
       ? query.lifecycle
       : "";
+  const profileUpdated = query.profile === "updated";
 
   return (
     <main className="px-5 py-8 sm:px-8 lg:px-10 lg:py-10">
@@ -148,20 +157,49 @@ export default async function MemberDetailPage({
           </p>
         ) : null}
 
+        {profileUpdated ? (
+          <p className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800" role="status">
+            Member profile updated successfully.
+          </p>
+        ) : null}
+
         <section className="mt-5 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
           <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-start">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-700">
-                {member.member_code}
-              </p>
-              <h1 className="mt-2 text-3xl font-semibold tracking-tight">
-                {member.full_name}
-              </h1>
-              <p className="mt-2 text-sm text-slate-500">
-                {member.phone}{member.email ? ` · ${member.email}` : ""}
-              </p>
+            <div className="flex min-w-0 items-center gap-4">
+              {photoUrl ? (
+                // Signed, short-lived tenant asset.
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  alt={`${member.full_name} profile`}
+                  className="h-20 w-20 shrink-0 rounded-2xl border border-slate-200 object-cover"
+                  src={photoUrl}
+                />
+              ) : (
+                <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 text-xl font-bold text-emerald-800">
+                  {member.full_name.split(/\s+/).slice(0, 2).map((part) => part[0]?.toUpperCase()).join("")}
+                </div>
+              )}
+              <div className="min-w-0">
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-700">
+                  {member.member_code}
+                </p>
+                <h1 className="mt-2 truncate text-3xl font-semibold tracking-tight">
+                  {member.full_name}
+                </h1>
+                <p className="mt-2 text-sm text-slate-500">
+                  {member.phone}{member.email ? ` · ${member.email}` : ""}
+                </p>
+              </div>
             </div>
             <div className="flex flex-wrap gap-3">
+              {membership.canManageMembers ? (
+                <Link
+                  className="inline-flex w-fit rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-400"
+                  href={`/gym/${organizationSlug}/members/${member.id}/edit`}
+                >
+                  Edit profile
+                </Link>
+              ) : null}
               {membership.canManageCheckIns && member.status === "active" ? (
                 <Link
                   className="inline-flex w-fit rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-400"

@@ -1,7 +1,11 @@
 import { router, type Href, useLocalSearchParams } from "expo-router";
+import { Image } from "expo-image";
+import { ImageManipulator, SaveFormat } from "expo-image-manipulator";
+import * as ImagePicker from "expo-image-picker";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -60,6 +64,7 @@ export default function StaffMemberDetailScreen() {
   const [balances, setBalances] = useState<BalanceRow[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isPhotoBusy, setIsPhotoBusy] = useState(false);
 
   const refresh = useCallback(async () => {
     if (!workspace?.hasStaffMode || !memberId) {
@@ -125,6 +130,137 @@ export default function StaffMemberDetailScreen() {
     () => new Map(balances.map((balance) => [balance.membership_id, balance])),
     [balances],
   );
+
+  const prepareAndUploadPhoto = useCallback(
+    async (source: "camera" | "library") => {
+      if (!workspace?.canManageMembers || !member) return;
+
+      setIsPhotoBusy(true);
+      setError(null);
+
+      try {
+        if (source === "camera") {
+          const permission = await ImagePicker.requestCameraPermissionsAsync();
+          if (!permission.granted) {
+            throw new Error("Camera permission is needed to take a member photo.");
+          }
+        }
+
+        const result =
+          source === "camera"
+            ? await ImagePicker.launchCameraAsync({
+                allowsEditing: true,
+                aspect: [1, 1],
+                mediaTypes: ["images"],
+                quality: 0.9,
+              })
+            : await ImagePicker.launchImageLibraryAsync({
+                allowsEditing: true,
+                aspect: [1, 1],
+                mediaTypes: ["images"],
+                quality: 0.9,
+              });
+
+        if (result.canceled || !result.assets[0]) return;
+        const asset = result.assets[0];
+        const context = ImageManipulator.manipulate(asset.uri);
+        context.resize(
+          asset.width >= asset.height
+            ? { width: 512, height: null }
+            : { width: null, height: 512 },
+        );
+        const rendered = await context.renderAsync();
+        const prepared = await rendered.saveAsync({
+          compress: 0.78,
+          format: SaveFormat.JPEG,
+        });
+        const response = await fetch(prepared.uri);
+        const photoBytes = await response.arrayBuffer();
+        if (photoBytes.byteLength > 1024 * 1024) {
+          throw new Error("The prepared photo is larger than 1 MB.");
+        }
+
+        const path = `${workspace.organization.id}/${member.id}/profile.jpg`;
+        const uploadResult = await supabase.storage
+          .from("member-photos")
+          .upload(path, photoBytes, {
+            cacheControl: "3600",
+            contentType: "image/jpeg",
+            upsert: true,
+          });
+        if (uploadResult.error) throw uploadResult.error;
+
+        const profileResult = await supabase.rpc("set_member_photo", {
+          p_organization_id: workspace.organization.id,
+          p_member_id: member.id,
+          p_photo_path: path,
+          p_consent_version: "2026-10-v1",
+        });
+        if (profileResult.error) {
+          await supabase.storage.from("member-photos").remove([path]);
+          throw profileResult.error;
+        }
+
+        await refresh();
+      } catch (cause) {
+        console.error("Member photo could not be saved", cause);
+        setError(
+          cause instanceof Error
+            ? cause.message
+            : "The member photo could not be saved.",
+        );
+      } finally {
+        setIsPhotoBusy(false);
+      }
+    },
+    [member, refresh, workspace],
+  );
+
+  const requestPhotoConsent = useCallback(
+    (source: "camera" | "library") => {
+      Alert.alert(
+        "Confirm member consent",
+        "Only continue if the member agreed to their photograph being stored for gym operations.",
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Consent confirmed",
+            onPress: () => void prepareAndUploadPhoto(source),
+          },
+        ],
+      );
+    },
+    [prepareAndUploadPhoto],
+  );
+
+  const removePhoto = useCallback(async () => {
+    if (!workspace?.canManageMembers || !member?.photoPath) return;
+    setIsPhotoBusy(true);
+    setError(null);
+
+    try {
+      const profileResult = await supabase.rpc("clear_member_photo", {
+        p_organization_id: workspace.organization.id,
+        p_member_id: member.id,
+      });
+      if (profileResult.error) throw profileResult.error;
+
+      const removeResult = await supabase.storage
+        .from("member-photos")
+        .remove([member.photoPath]);
+      if (removeResult.error) {
+        console.error("Detached member photo object could not be removed", {
+          message: removeResult.error.message,
+        });
+      }
+      await refresh();
+    } catch (cause) {
+      console.error("Member photo could not be removed", cause);
+      setError("The member photo could not be removed. Please try again.");
+    } finally {
+      setIsPhotoBusy(false);
+    }
+  }, [member, refresh, workspace]);
 
   if (!workspace) {
     return (
@@ -219,6 +355,24 @@ export default function StaffMemberDetailScreen() {
           <>
             <View style={styles.profileCard}>
               <View style={styles.profileTop}>
+                {member.photoUrl ? (
+                  <Image
+                    accessibilityLabel={`${member.fullName} profile`}
+                    contentFit="cover"
+                    source={{ uri: member.photoUrl }}
+                    style={styles.profilePhoto}
+                  />
+                ) : (
+                  <View style={styles.profilePhotoFallback}>
+                    <Text style={styles.profilePhotoInitials}>
+                      {member.fullName
+                        .split(/\s+/)
+                        .slice(0, 2)
+                        .map((part) => part[0]?.toUpperCase())
+                        .join("")}
+                    </Text>
+                  </View>
+                )}
                 <View style={styles.profileCopy}>
                   <Text style={styles.memberCode}>{member.memberCode}</Text>
                   <Text style={styles.memberName}>{member.fullName}</Text>
@@ -228,6 +382,38 @@ export default function StaffMemberDetailScreen() {
                 </View>
                 <Text style={styles.profileStatus}>{member.status}</Text>
               </View>
+              {workspace.canManageMembers && (
+                <View style={styles.photoActions}>
+                  <MiniAction
+                    label={isPhotoBusy ? "Working…" : "Take photo"}
+                    onPress={() => requestPhotoConsent("camera")}
+                  />
+                  <MiniAction
+                    label={member.photoPath ? "Replace from gallery" : "Choose from gallery"}
+                    onPress={() => requestPhotoConsent("library")}
+                  />
+                  {member.photoPath && (
+                    <MiniAction
+                      label="Remove photo"
+                      onPress={() =>
+                        Alert.alert(
+                          "Remove member photo?",
+                          "The photo will be detached from the profile and deleted from private storage.",
+                          [
+                            { text: "Cancel", style: "cancel" },
+                            {
+                              text: "Remove",
+                              style: "destructive",
+                              onPress: () => void removePhoto(),
+                            },
+                          ],
+                        )
+                      }
+                      tone="warning"
+                    />
+                  )}
+                </View>
+              )}
               <View style={styles.branchStrip}>
                 <Text style={styles.branchLabel}>HOME BRANCH</Text>
                 <Text style={styles.branchName}>
@@ -405,6 +591,9 @@ const styles = StyleSheet.create({
   successText: { color: colors.accentDeep, fontSize: 13, fontWeight: "700" },
   profileCard: { backgroundColor: colors.surface, borderColor: colors.line, borderRadius: 24, borderWidth: 1, gap: 18, padding: 21 },
   profileTop: { alignItems: "flex-start", flexDirection: "row", gap: 14 },
+  profilePhoto: { borderRadius: 18, height: 72, width: 72 },
+  profilePhotoFallback: { alignItems: "center", backgroundColor: colors.accentSoft, borderRadius: 18, height: 72, justifyContent: "center", width: 72 },
+  profilePhotoInitials: { color: colors.accentDeep, fontSize: 20, fontWeight: "900" },
   profileCopy: { flex: 1 },
   memberCode: { color: colors.accentDark, fontSize: 11, fontWeight: "900", letterSpacing: 1 },
   memberName: { color: colors.ink, fontSize: 28, fontWeight: "900", letterSpacing: -0.8, marginTop: 5 },
@@ -413,6 +602,7 @@ const styles = StyleSheet.create({
   branchStrip: { backgroundColor: colors.surfaceMuted, borderRadius: 13, padding: 13 },
   branchLabel: { color: colors.inkMuted, fontSize: 9, fontWeight: "900", letterSpacing: 0.8 },
   branchName: { color: colors.ink, fontSize: 14, fontWeight: "800", marginTop: 4 },
+  photoActions: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   sectionHeading: { marginBottom: 12, marginTop: 30 },
   sectionTitle: { color: colors.ink, fontSize: 21, fontWeight: "900" },
   sectionSubtitle: { color: colors.inkMuted, fontSize: 13, marginTop: 4 },

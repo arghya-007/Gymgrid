@@ -13,11 +13,18 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
+  ),
   title: {
     default: "GymGrid",
     template: "%s | GymGrid",
   },
   description: "Multi-tenant gym management software for Indian fitness businesses.",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

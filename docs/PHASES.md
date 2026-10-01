@@ -73,10 +73,14 @@ The Phase 5 MVP gate is green. Authorized owners, managers, and receptionists ca
 - [x] Add pilot operations and security-review runbooks.
 - [x] Add a credential-free, reproducible demo tenant and validate idempotent seeding.
 - [x] Run a real-browser smoke pass for the public entry, login form, and protected-route redirect.
+- [x] Add editable web member profiles and consent-backed private member photos on web and Android.
+- [x] Add Vercel, EAS, domain, cloud-acceptance, and rollback instructions for the owner.
 - [ ] Add a credentialed browser end-to-end suite for the main gym workflow.
 - [ ] Execute controlled pilot onboarding with a separate pilot Supabase project and real devices.
 
 The first Phase 6 checkpoint is live. An authorized owner, manager, or receptionist can prepare app access for an active member in their branch scope. The account is linked only when the exact invited email signs in, and a suspended organization user cannot use a new invitation to regain access. The live rollback test passed and left all fixtures at zero.
+
+The member-profile checkpoint is live in the development project. Authorized owners, managers, and receptionists can edit a member and upload, replace, or remove a consent-backed photo from the web or Android app. Photos use a private Supabase bucket, short-lived signed URLs, a 1 MB stored-object limit, branch-aware Storage RLS, and explicit photo consent. Migration `202610010016` and its rollback-only authorization test passed; the verification query found all four Storage policies and zero remaining test fixtures.
 
 ## After pilot
 

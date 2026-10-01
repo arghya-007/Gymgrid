@@ -11,6 +11,8 @@ export interface StaffMember {
   phone: string;
   status: "active" | "inactive" | "archived";
   authUserId: string | null;
+  photoPath: string | null;
+  photoUrl: string | null;
 }
 
 interface StaffMemberRow {
@@ -24,6 +26,7 @@ interface StaffMemberRow {
   phone: string;
   status: "active" | "inactive" | "archived";
   auth_user_id: string | null;
+  photo_path: string | null;
 }
 
 export async function loadStaffMember(
@@ -33,7 +36,7 @@ export async function loadStaffMember(
   const { data, error } = await supabase
     .from("members")
     .select(
-      "id, organization_id, home_branch_id, member_code, full_name, preferred_name, email, phone, status, auth_user_id",
+      "id, organization_id, home_branch_id, member_code, full_name, preferred_name, email, phone, status, auth_user_id, photo_path",
     )
     .eq("organization_id", organizationId)
     .eq("id", memberId)
@@ -43,6 +46,14 @@ export async function loadStaffMember(
 
   const member = data as StaffMemberRow | null;
   if (!member) return null;
+
+  let photoUrl: string | null = null;
+  if (member.photo_path) {
+    const signedResult = await supabase.storage
+      .from("member-photos")
+      .createSignedUrl(member.photo_path, 3600);
+    if (!signedResult.error) photoUrl = signedResult.data.signedUrl;
+  }
 
   return {
     id: member.id,
@@ -55,6 +66,8 @@ export async function loadStaffMember(
     phone: member.phone,
     status: member.status,
     authUserId: member.auth_user_id,
+    photoPath: member.photo_path,
+    photoUrl,
   };
 }
 
