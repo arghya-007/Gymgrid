@@ -17,7 +17,7 @@ The current codebase is suitable for a controlled, operator-assisted pilot after
 
 ## Accepted pilot risks
 
-`npm audit` currently reports 34 moderate transitive findings under Expo Router tooling (`decode-uri-component` through `query-string`) and Expo/Xcode configuration tooling (`uuid`). The available forced remediation would apply breaking dependency changes or downgrade the application stack, so it is not accepted automatically. High and critical advisories are zero at this checkpoint and remain a hard release gate. Reassess after each Expo SDK-compatible dependency update.
+`npm audit` currently reports 14 moderate transitive findings under Expo Router tooling (`decode-uri-component` through `query-string`) and Expo/Xcode configuration tooling (`uuid`). The available forced remediation would apply breaking dependency changes or downgrade the application stack, so it is not accepted automatically. High and critical advisories are zero at this checkpoint and remain a hard release gate. Reassess after each Expo SDK-compatible dependency update.
 
 Account creation and invitation delivery are manual during the controlled pilot. This reduces public attack surface but adds operator risk: the Auth email must exactly match the member invitation, temporary passwords must use a private channel, and the operator must never retain the member's replacement password.
 

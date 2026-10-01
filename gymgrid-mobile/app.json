@@ -8,9 +8,11 @@
     "scheme": "gymgrid",
     "userInterfaceStyle": "light",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "in.gymgrid.app"
     },
     "android": {
+      "package": "in.gymgrid.app",
       "adaptiveIcon": {
         "backgroundColor": "#ECFDF5",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -33,7 +35,15 @@
           "imageWidth": 76
         }
       ],
-      "expo-sqlite"
+      "expo-sqlite",
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "Allow GymGrid to take a member photo after the member gives consent.",
+          "photosPermission": "Allow GymGrid to choose a member photo after the member gives consent.",
+          "microphonePermission": false
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

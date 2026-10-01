@@ -1,6 +1,6 @@
 # Database source of truth
 
-The Phase 1 core through the Phase 6 member-app invitation checkpoint are applied to the development Supabase project. Local public client values live only in the ignored web and mobile environment files.
+The Phase 1 core through the Phase 6 member-profile/photo checkpoint are applied to the development Supabase project. The photo migration and rollback-only authorization test passed, all four Storage policies are present, and zero test fixtures remain. Local public client values live only in the ignored web and mobile environment files.
 
 - Place reviewed, forward-only SQL migrations in `migrations/`.
 - Keep safe demo-only data under `demo/`; the default `seed.sql` never creates credentials.
@@ -84,6 +84,11 @@ The Phase 1 core through the Phase 6 member-app invitation checkpoint are applie
 - `tests/phase6_member_app_invitations_rls.sql` verifies owner invitation creation, successful linkage, unauthorized denial, suspended-account protection, and rollback cleanup.
 - `demo/seed_demo.sql` reproducibly creates a realistic demo tenant for an explicitly supplied development Auth user without storing a password or granting platform access.
 
+## Phase 6 member profile and photo contents
+
+- `migrations/202610010016_member_profiles_and_photos.sql` adds editable member profiles, general/photo consent timestamps, a private 1 MB `member-photos` bucket, short-lived signed-URL support, branch-aware Storage RLS, and secured photo/profile functions.
+- `tests/phase6_member_profiles_and_photos_rls.sql` verifies owner updates, linked-member visibility, unrelated-account denial, cross-tenant path denial, bucket privacy, and all four Storage policies inside a rollback-only transaction.
+
 When the Supabase CLI and Docker are available, initialize a local stack and repeat the database test there. The first platform administrator must be bootstrapped manually as described in `docs/SECURITY.md`; no personal user ID belongs in a migration.
 
 ## First CLI connection
@@ -108,7 +113,8 @@ supabase migration repair --status applied 202610010012
 supabase migration repair --status applied 202610010013
 supabase migration repair --status applied 202610010014
 supabase migration repair --status applied 202610010015
+supabase migration repair --status applied 202610010016
 supabase migration list
 ```
 
-The final command must show all fifteen versions in the local and remote columns. Future schema changes should then be deployed with migration files and `supabase db push`, not pasted into the dashboard.
+The final command must show all sixteen versions in the local and remote columns. Future schema changes should then be deployed with migration files and `supabase db push`, not pasted into the dashboard.

@@ -27,6 +27,8 @@ cd gymgrid-mobile && npx expo export --platform all --output-dir dist
 
 The GitHub `Quality gates` workflow repeats these checks without production secrets. Run every migration and its matching transaction-based test against a disposable project first. Confirm the final verification query reports zero fixture rows.
 
+Use `docs/TESTING_AND_DEPLOYMENT.md` for the exact Vercel, custom-domain, Expo/EAS, and cloud acceptance steps.
+
 ## 3. Create the pilot gym
 
 1. Create the gym owner's Auth user in the pilot Supabase dashboard with a temporary password delivered through a private channel.
@@ -62,6 +64,7 @@ Never reuse one email for multiple member records in the same gym. Reissue an ex
 - Test one user with both a member role and a staff role and verify the workspace switcher.
 - Test a suspended user and confirm a new invitation cannot restore access.
 - Verify Android on at least one supported physical device and verify the web portal at desktop and narrow widths.
+- Verify member photo consent, camera/gallery upload, replacement, removal, and cross-tenant denial on web and Android.
 - Record the deployed commit, migration list, environment owners, backup status, pilot contacts, and rollback decision-maker.
 
 ## 7. Incident and rollback

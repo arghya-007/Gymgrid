@@ -14,7 +14,7 @@ docs/              Product, architecture, security and phase plans
 
 ## Development status
 
-Phases 1 through 5 are complete and verified against the development Supabase project. Phase 6 pilot hardening is in progress: member app invitations are linked atomically, automated quality gates cover both clients, and the controlled-pilot and security runbooks are versioned. Online payment providers, messaging, deployment, and production infrastructure remain disconnected.
+Phases 1 through 5 are complete and verified against the development Supabase project. Phase 6 pilot hardening is in progress: member app invitations are linked atomically, private consent-backed member photos and editable web profiles are versioned, automated quality gates cover both clients, and the controlled-pilot and deployment runbooks are versioned. Online payment providers, messaging, and production infrastructure remain disconnected.
 
 ## Local commands
 
@@ -33,6 +33,7 @@ npm run doctor:mobile
 
 Read [the development plan](docs/PHASES.md) before starting a new feature.
 Use [the pilot runbook](docs/PILOT.md) before onboarding a real gym, and review [the pilot security assessment](docs/SECURITY_REVIEW.md) before every release candidate.
+Follow [the testing and deployment guide](docs/TESTING_AND_DEPLOYMENT.md) for Supabase migration history, Vercel previews, a custom app subdomain, Expo/EAS Android builds, acceptance tests, and rollback.
 
 Before using the authenticated routes, copy `gymgrid-web/.env.example` to `gymgrid-web/.env.local` and add values from a development-only Supabase project. See [the security model](docs/SECURITY.md) for platform-admin bootstrap and tenant-isolation verification.
 
