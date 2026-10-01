@@ -41,11 +41,14 @@ interface BalanceRow {
 }
 
 export default function StaffMemberDetailScreen() {
-  const { membershipId, memberId, created, enrolled } = useLocalSearchParams<{
+  const { membershipId, memberId, created, enrolled, renewed, lifecycle, payment } = useLocalSearchParams<{
     membershipId: string;
     memberId: string;
     created?: string;
     enrolled?: string;
+    renewed?: string;
+    lifecycle?: string;
+    payment?: string;
   }>();
   const { workspaces } = useWorkspaces();
   const workspace = workspaces.find(
@@ -83,13 +86,15 @@ export default function StaffMemberDetailScreen() {
           .eq("organization_id", workspace.organization.id)
           .eq("member_id", memberId)
           .order("start_date", { ascending: false }),
-        supabase
-          .from("membership_payment_balances")
-          .select(
-            "membership_id, paid_amount_minor, outstanding_amount_minor",
-          )
-          .eq("organization_id", workspace.organization.id)
-          .eq("member_id", memberId),
+        workspace.canManagePayments
+          ? supabase
+              .from("membership_payment_balances")
+              .select(
+                "membership_id, paid_amount_minor, outstanding_amount_minor",
+              )
+              .eq("organization_id", workspace.organization.id)
+              .eq("member_id", memberId)
+          : Promise.resolve({ data: [], error: null }),
       ]);
 
       const firstError = membershipsResult.error ?? balancesResult.error;
@@ -169,6 +174,27 @@ export default function StaffMemberDetailScreen() {
             </Text>
           </View>
         )}
+        {renewed && (
+          <View style={styles.successCard}>
+            <Text style={styles.successText}>
+              Renewal {String(renewed).slice(0, 20)} was created successfully.
+            </Text>
+          </View>
+        )}
+        {lifecycle && (
+          <View style={styles.successCard}>
+            <Text style={styles.successText}>
+              The membership was {String(lifecycle).slice(0, 20)} successfully.
+            </Text>
+          </View>
+        )}
+        {payment && (
+          <View style={styles.successCard}>
+            <Text style={styles.successText}>
+              Payment {String(payment).slice(0, 20)} was recorded successfully.
+            </Text>
+          </View>
+        )}
 
         {isLoading && !member ? (
           <View style={styles.centerState}>
@@ -230,6 +256,9 @@ export default function StaffMemberDetailScreen() {
               <View style={styles.list}>
                 {memberships.map((membership) => {
                   const balance = balanceByMembership.get(membership.id);
+                  const outstanding =
+                    balance?.outstanding_amount_minor ??
+                    membership.contract_amount_minor;
                   return (
                     <View key={membership.id} style={styles.membershipCard}>
                       <View style={styles.rowBetween}>
@@ -246,20 +275,64 @@ export default function StaffMemberDetailScreen() {
                       <Text style={styles.membershipMeta}>
                         {formatGymDate(membership.start_date)} – {formatGymDate(membership.end_date)}
                       </Text>
-                      <View style={styles.balanceRow}>
-                        <Text style={styles.balanceText}>
-                          {formatMoney(
-                            balance?.paid_amount_minor ?? 0,
+                      {workspace.canManagePayments ? (
+                        <View style={styles.balanceRow}>
+                          <Text style={styles.balanceText}>
+                            {formatMoney(
+                              balance?.paid_amount_minor ?? 0,
+                              membership.currency,
+                            )} paid
+                          </Text>
+                          <Text style={styles.dueText}>
+                            {formatMoney(outstanding, membership.currency)} due
+                          </Text>
+                        </View>
+                      ) : (
+                        <Text style={styles.membershipMeta}>
+                          Contract {formatMoney(
+                            membership.contract_amount_minor,
                             membership.currency,
-                          )} paid
+                          )}
                         </Text>
-                        <Text style={styles.dueText}>
-                          {formatMoney(
-                            balance?.outstanding_amount_minor ??
-                              membership.contract_amount_minor,
-                            membership.currency,
-                          )} due
-                        </Text>
+                      )}
+                      <View style={styles.actionRow}>
+                        {workspace.canManageMemberships &&
+                          !["frozen", "cancelled"].includes(
+                            membership.status,
+                          ) && (
+                            <MiniAction
+                              label="Renew"
+                              onPress={() =>
+                                router.push(
+                                  `/staff/${workspace.membershipId}/members/${member.id}/memberships/${membership.id}/renew` as Href,
+                                )
+                              }
+                            />
+                          )}
+                        {workspace.canManageMemberships &&
+                          ["active", "scheduled", "frozen"].includes(
+                            membership.status,
+                          ) && (
+                            <MiniAction
+                              label="Manage"
+                              onPress={() =>
+                                router.push(
+                                  `/staff/${workspace.membershipId}/members/${member.id}/memberships/${membership.id}/manage` as Href,
+                                )
+                              }
+                            />
+                          )}
+                        {workspace.canManagePayments && outstanding > 0 && (
+                          <MiniAction
+                            label="Record payment"
+                            onPress={() =>
+                              router.push(
+                                `/staff/${workspace.membershipId}/members/${member.id}/memberships/${membership.id}/payment` as Href,
+                              )
+                            }
+                            tone="warning"
+                          />
+                        )}
                       </View>
                     </View>
                   );
@@ -270,6 +343,29 @@ export default function StaffMemberDetailScreen() {
         )}
       </ScrollView>
     </SafeAreaView>
+  );
+}
+
+function MiniAction({
+  label,
+  onPress,
+  tone = "default",
+}: {
+  label: string;
+  onPress: () => void;
+  tone?: "default" | "warning";
+}) {
+  return (
+    <Pressable onPress={onPress} style={styles.miniAction}>
+      <Text
+        style={[
+          styles.miniActionText,
+          tone === "warning" && styles.miniActionWarning,
+        ]}
+      >
+        {label}
+      </Text>
+    </Pressable>
   );
 }
 
@@ -304,6 +400,10 @@ const styles = StyleSheet.create({
   balanceRow: { flexDirection: "row", gap: 15 },
   balanceText: { color: colors.accentDark, fontSize: 12, fontWeight: "800" },
   dueText: { color: colors.warning, fontSize: 12, fontWeight: "800" },
+  actionRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 3 },
+  miniAction: { backgroundColor: colors.surfaceMuted, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 8 },
+  miniActionText: { color: colors.accentDark, fontSize: 11, fontWeight: "900" },
+  miniActionWarning: { color: colors.warning },
   emptyCard: { alignItems: "center", backgroundColor: colors.surface, borderColor: colors.line, borderRadius: 18, borderWidth: 1, gap: 8, padding: 26 },
   centerState: { alignItems: "center", backgroundColor: colors.surface, borderColor: colors.line, borderRadius: 20, borderWidth: 1, gap: 14, padding: 28 },
   stateTitle: { color: colors.ink, fontSize: 20, fontWeight: "900", textAlign: "center" },

@@ -123,6 +123,9 @@ export default function WorkspaceHomeScreen() {
     if (key === "new-member") {
       router.push(`/staff/${workspace.membershipId}/members/new` as Href);
     }
+    if (key === "collections") {
+      router.push(`/staff/${workspace.membershipId}/collections` as Href);
+    }
   };
 
   return (
@@ -170,7 +173,8 @@ export default function WorkspaceHomeScreen() {
             const isStaffAction =
               requestedMode === "staff" &&
               (actionKey === "members" ||
-                (actionKey === "new-member" && workspace.canManageMembers));
+                (actionKey === "new-member" && workspace.canManageMembers) ||
+                (actionKey === "collections" && workspace.canManagePayments));
             const isAvailable = isMemberAction || isStaffAction;
             return (
               <Pressable
