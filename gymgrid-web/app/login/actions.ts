@@ -37,7 +37,7 @@ export async function signIn(
     return { message: "The email or password is incorrect." };
   }
 
-  redirect("/platform");
+  redirect("/workspace");
 }
 
 export async function signOut() {

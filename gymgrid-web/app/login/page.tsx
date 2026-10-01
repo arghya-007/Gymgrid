@@ -9,10 +9,10 @@ export default function LoginPage() {
           GymGrid
         </Link>
         <h1 className="mt-5 text-3xl font-semibold tracking-tight text-slate-950">
-          Platform sign in
+          Sign in to GymGrid
         </h1>
         <p className="mt-2 text-sm leading-6 text-slate-600">
-          Use your GymGrid platform administrator account. Gym owner and member workspaces arrive in later phases.
+          Use your invited platform or gym-team account. GymGrid will route you to the workspace your role can access.
         </p>
         <LoginForm />
       </section>

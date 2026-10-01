@@ -1,9 +1,9 @@
 # Database source of truth
 
-The Phase 1 core, all Phase 2 migrations, all Phase 3 operations migrations, and the Phase 4 scheduling foundation are applied to the development Supabase project. Local public client values live only in the ignored `gymgrid-web/.env.local` file.
+The Phase 1 core through the Phase 6 member-app invitation checkpoint are applied to the development Supabase project. Local public client values live only in the ignored web and mobile environment files.
 
 - Place reviewed, forward-only SQL migrations in `migrations/`.
-- Keep safe demo-only data in `seed.sql`.
+- Keep safe demo-only data under `demo/`; the default `seed.sql` never creates credentials.
 - Do not put connection strings, API keys, service-role keys, or production exports here.
 - Do not make schema changes only in the Supabase dashboard; every change must be represented by a migration in this repository.
 
@@ -11,7 +11,7 @@ The Phase 1 core, all Phase 2 migrations, all Phase 3 operations migrations, and
 
 - `migrations/202609300001_secure_saas_core.sql` contains the tenant, role, subscription, entitlement, invitation, audit, and Row Level Security foundation.
 - `tests/phase1_rls.sql` is a transaction-based cross-tenant isolation test for a disposable local database.
-- `seed.sql` remains production-data-free.
+- `seed.sql` remains production-data-free and points to the credential-free demo instructions.
 
 ## Phase 2 Member CRM contents
 
@@ -73,11 +73,22 @@ The Phase 1 core, all Phase 2 migrations, all Phase 3 operations migrations, and
 - `migrations/202610010013_class_qr_check_ins.sql` contains rotatable member QR passes, authenticated class-kiosk check-ins, confirmed-booking and time-window validation, idempotent scans, checked-in booking protection, audit coverage, and RLS.
 - `tests/phase4_class_qr_check_ins_rls.sql` verifies trainer scans, duplicate scans, waitlist rejection, linked-member pass rotation, checked-in cancellation protection, direct-write and cross-tenant blocking, and rollback cleanup.
 
+## Phase 5 member mobile self-service contents
+
+- `migrations/202610010014_member_mobile_self_service.sql` adds member-scoped membership and payment reads used by the Android-first application.
+- `tests/phase5_member_mobile_self_service_rls.sql` verifies exact self-service visibility and denial across member records and tenants, then rolls back every fixture.
+
+## Phase 6 member app invitation contents
+
+- `migrations/202610010015_member_app_invitations.sql` adds exact-member invitations and atomic Auth-account linkage without reactivating suspended organization users.
+- `tests/phase6_member_app_invitations_rls.sql` verifies owner invitation creation, successful linkage, unauthorized denial, suspended-account protection, and rollback cleanup.
+- `demo/seed_demo.sql` reproducibly creates a realistic demo tenant for an explicitly supplied development Auth user without storing a password or granting platform access.
+
 When the Supabase CLI and Docker are available, initialize a local stack and repeat the database test there. The first platform administrator must be bootstrapped manually as described in `docs/SECURITY.md`; no personal user ID belongs in a migration.
 
 ## First CLI connection
 
-The first thirteen migrations were applied through the SQL editor because the company laptop does not have the Supabase CLI or Docker. The schema is verified, but the CLI migration-history table has not been initialized. On the first CLI-capable computer, repair the history **before** running `db push`:
+The first fifteen migrations were applied through the SQL editor because the company laptop does not have the Supabase CLI or Docker. The schema is verified, but the CLI migration-history table has not been initialized. On the first CLI-capable computer, repair the history **before** running `db push`:
 
 ```bash
 supabase login
@@ -95,7 +106,9 @@ supabase migration repair --status applied 202609300010
 supabase migration repair --status applied 202609300011
 supabase migration repair --status applied 202610010012
 supabase migration repair --status applied 202610010013
+supabase migration repair --status applied 202610010014
+supabase migration repair --status applied 202610010015
 supabase migration list
 ```
 
-The final command must show all thirteen versions in the local and remote columns. Future schema changes should then be deployed with migration files and `supabase db push`, not pasted into the dashboard.
+The final command must show all fifteen versions in the local and remote columns. Future schema changes should then be deployed with migration files and `supabase db push`, not pasted into the dashboard.

@@ -1,3 +1,3 @@
--- Keep this file safe for local development. Product plans are migration data.
--- Demo gyms and users will be added in a later phase and must never contain
--- production data or credentials.
+-- Product plans are migration data. The optional, credential-free pilot demo
+-- tenant is seeded separately because it requires an existing Auth user ID.
+-- See supabase/demo/README.md.

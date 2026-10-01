@@ -37,6 +37,7 @@ The GitHub `Quality gates` workflow repeats these checks without production secr
 
 ## 4. Load and validate data
 
+- For a rehearsal, create a disposable Auth user and load the credential-free `supabase/demo/seed_demo.sql` tenant as documented in `supabase/demo/README.md`.
 - Start with a small reviewed CSV import. Compare imported totals and rejected rows with the source file.
 - Create plans and verify duration, tax-inclusive price, currency, branch availability, and active status.
 - Enrol two test members, record a partial payment, renew one membership, and exercise freeze/resume/cancel on test-only records.

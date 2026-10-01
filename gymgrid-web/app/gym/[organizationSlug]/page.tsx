@@ -179,7 +179,7 @@ export default async function GymDashboardPage({
 
           <section className="rounded-3xl bg-slate-950 p-6 text-white shadow-sm">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400">
-              Phase 4
+              Phase 6
             </p>
             <h2 className="mt-3 text-2xl font-semibold tracking-tight">
               Scheduling is ready
@@ -188,9 +188,9 @@ export default async function GymDashboardPage({
               Branch class types, trainer-aware sessions, capacity-safe bookings, ordered waitlists, QR passes, and class check-ins now share the secure tenant workspace.
             </p>
             <div className="mt-6 rounded-2xl border border-slate-800 bg-slate-900 p-4">
-              <p className="text-sm font-semibold">Next phase</p>
+              <p className="text-sm font-semibold">Pilot readiness</p>
               <p className="mt-1 text-sm text-slate-400">
-                Android member workflows and the owner/staff workspace.
+                Validate staff roles, member app invitations, and daily reconciliation before onboarding a real gym.
               </p>
             </div>
           </section>
