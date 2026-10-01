@@ -67,7 +67,14 @@ The Phase 5 MVP gate is green. Authorized owners, managers, and receptionists ca
 
 ## Phase 6 — Pilot quality
 
-- Add end-to-end tests, mobile validation, security audit, demo tenant, documentation, and controlled pilot onboarding.
+- [x] Add owner/staff member app invitations with exact-email account linking.
+- [x] Add rollback-only invitation, linkage, denial, and suspended-account database tests.
+- [x] Add automated web/mobile lint, type-check, build, export, Doctor, and dependency gates.
+- [x] Add pilot operations and security-review runbooks.
+- [ ] Add a reproducible demo tenant and browser end-to-end smoke suite.
+- [ ] Execute controlled pilot onboarding with a separate pilot Supabase project and real devices.
+
+The first Phase 6 checkpoint is live. An authorized owner, manager, or receptionist can prepare app access for an active member in their branch scope. The account is linked only when the exact invited email signs in, and a suspended organization user cannot use a new invitation to regain access. The live rollback test passed and left all fixtures at zero.
 
 ## After pilot
 

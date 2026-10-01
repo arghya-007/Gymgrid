@@ -10,6 +10,7 @@ export interface StaffMember {
   email: string | null;
   phone: string;
   status: "active" | "inactive" | "archived";
+  authUserId: string | null;
 }
 
 interface StaffMemberRow {
@@ -22,6 +23,7 @@ interface StaffMemberRow {
   email: string | null;
   phone: string;
   status: "active" | "inactive" | "archived";
+  auth_user_id: string | null;
 }
 
 export async function loadStaffMember(
@@ -31,7 +33,7 @@ export async function loadStaffMember(
   const { data, error } = await supabase
     .from("members")
     .select(
-      "id, organization_id, home_branch_id, member_code, full_name, preferred_name, email, phone, status",
+      "id, organization_id, home_branch_id, member_code, full_name, preferred_name, email, phone, status, auth_user_id",
     )
     .eq("organization_id", organizationId)
     .eq("id", memberId)
@@ -52,6 +54,7 @@ export async function loadStaffMember(
     email: member.email,
     phone: member.phone,
     status: member.status,
+    authUserId: member.auth_user_id,
   };
 }
 

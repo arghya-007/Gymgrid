@@ -41,7 +41,7 @@ interface BalanceRow {
 }
 
 export default function StaffMemberDetailScreen() {
-  const { membershipId, memberId, created, enrolled, renewed, lifecycle, payment } = useLocalSearchParams<{
+  const { membershipId, memberId, created, enrolled, renewed, lifecycle, payment, invited } = useLocalSearchParams<{
     membershipId: string;
     memberId: string;
     created?: string;
@@ -49,6 +49,7 @@ export default function StaffMemberDetailScreen() {
     renewed?: string;
     lifecycle?: string;
     payment?: string;
+    invited?: string;
   }>();
   const { workspaces } = useWorkspaces();
   const workspace = workspaces.find(
@@ -195,6 +196,13 @@ export default function StaffMemberDetailScreen() {
             </Text>
           </View>
         )}
+        {invited && (
+          <View style={styles.successCard}>
+            <Text style={styles.successText}>
+              Member app invitation prepared for {String(invited).slice(0, 120)}.
+            </Text>
+          </View>
+        )}
 
         {isLoading && !member ? (
           <View style={styles.centerState}>
@@ -226,6 +234,25 @@ export default function StaffMemberDetailScreen() {
                   {branch?.name ?? "Assigned branch"}
                 </Text>
               </View>
+              <View style={styles.branchStrip}>
+                <Text style={styles.branchLabel}>MEMBER APP ACCESS</Text>
+                <Text style={styles.branchName}>
+                  {member.authUserId ? "Linked account" : "Not linked yet"}
+                </Text>
+              </View>
+              {workspace.canManageMembers &&
+                member.status === "active" &&
+                !member.authUserId && (
+                  <PrimaryButton
+                    label="Invite to member app"
+                    onPress={() =>
+                      router.push(
+                        `/staff/${workspace.membershipId}/members/${member.id}/invite` as Href,
+                      )
+                    }
+                    tone="secondary"
+                  />
+                )}
               {workspace.canManageMemberships && member.status === "active" && (
                 <PrimaryButton
                   label="Enrol in a plan"
