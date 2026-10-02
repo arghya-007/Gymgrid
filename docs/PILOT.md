@@ -75,6 +75,15 @@ Never reuse one email for multiple member records in the same gym. Reissue an ex
 - Preserve the incident time range, actor IDs, organization ID, and relevant audit-log rows before repair.
 - Roll back application code to the last green commit. Database migrations are forward-only: create and test a corrective migration rather than manually removing production schema.
 
+## Deferred pilot feedback — 2026-10-02
+
+These are recorded observations only. Do not implement them until the owner consolidates the remaining pilot feedback and prioritises the next change set.
+
+- **Web responsiveness:** The Vercel-hosted portal feels slow and late to respond. Profile the deployed experience (initial load, navigation, and Supabase requests) on representative Indian mobile and desktop networks before choosing optimisations.
+- **Web login readability:** The email and password field labels on the login screen need darker, accessible contrast against the current theme.
+- **Mobile login ergonomics:** On-screen keyboards can cover the email and password fields. The sign-in view should keep the focused field, validation message, and submit action visible with keyboard-aware scrolling/layout.
+- **Member enrolment flow:** Let staff select an existing plan while enrolling a member, offer a controlled custom-plan path when no standard plan fits, and allow a consent-backed camera/gallery member photo upload in the same flow.
+
 ## Current pilot boundaries
 
 - No Razorpay or other live online payment processing.
